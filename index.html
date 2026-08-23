@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es-CL">
 <head>
-  <!-- Metadatos: no se ven en la pagina, pero los lee el navegador y Google -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Colegio San Martín — Educación integral desde inicial hasta secundaria.">
-  <title>Colegio San Martín</title>
+  <meta name="description" content="Colegio Diferencial Mostazal — Colegio de Educación Especial en San Francisco de Mostazal, Región de O'Higgins. Educación parvularia especial, básica especial y formación laboral.">
+  <title>Colegio Diferencial Mostazal</title>
+  <link rel="icon" href="img/logo.svg" type="image/svg+xml">
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
@@ -14,11 +14,14 @@
   <header class="header" id="inicio">
     <nav class="nav container">
       <a href="#inicio" class="nav__logo">
-        <span class="nav__logo-icon">SM</span>
-        Colegio San Martín
+        <img src="img/logo.svg" alt="" class="nav__logo-img" width="46" height="46">
+        <span class="nav__logo-text">
+          <strong>Colegio Diferencial</strong>
+          <em>Mostazal</em>
+        </span>
       </a>
 
-      <!-- Botón que solo aparece en móvil (lo controla js/main.js) -->
+      <!-- Botón hamburguesa: solo aparece en móvil (lo controla js/main.js) -->
       <button class="nav__toggle" id="nav-toggle" aria-label="Abrir menú" aria-expanded="false">
         <span></span><span></span><span></span>
       </button>
@@ -27,6 +30,7 @@
         <li><a href="#inicio" class="nav__link">Inicio</a></li>
         <li><a href="#nosotros" class="nav__link">Nosotros</a></li>
         <li><a href="#niveles" class="nav__link">Niveles</a></li>
+        <li><a href="#equipo" class="nav__link">Equipo</a></li>
         <li><a href="#noticias" class="nav__link">Noticias</a></li>
         <li><a href="#contacto" class="nav__link nav__link--btn">Contacto</a></li>
       </ul>
@@ -34,40 +38,47 @@
   </header>
 
   <main>
-    <!-- ============ HERO (primera pantalla) ============ -->
+    <!-- ============ HERO ============ -->
     <section class="hero">
       <div class="container hero__content">
-        <p class="hero__eyebrow">Matrículas abiertas 2027</p>
-        <h1 class="hero__title">Formamos personas,<br>no solo estudiantes</h1>
+        <img src="img/logo.svg" alt="Logo del Colegio Diferencial Mostazal" class="hero__star" width="130" height="130">
+        <p class="hero__eyebrow">Matrícula abierta 2027</p>
+        <h1 class="hero__title">Cada niño y niña<br>brilla a su propio ritmo</h1>
         <p class="hero__text">
-          Más de 40 años brindando educación integral, con docentes calificados
-          y una comunidad que acompaña a cada alumno en su crecimiento.
+          Somos un colegio de educación especial en San Francisco de Mostazal.
+          Acompañamos a nuestros estudiantes con un equipo multidisciplinario
+          y un plan de trabajo pensado para cada uno.
         </p>
         <div class="hero__actions">
           <a href="#contacto" class="btn btn--primary">Solicitar información</a>
-          <a href="#niveles" class="btn btn--ghost">Ver niveles</a>
+          <a href="#niveles" class="btn btn--ghost">Conocer los niveles</a>
         </div>
       </div>
+      <!-- Onda decorativa que separa el hero del resto -->
+      <svg class="hero__wave" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M0,50 C240,90 480,10 720,35 C960,60 1200,85 1440,45 L1440,90 L0,90 Z" fill="#ffffff"/>
+      </svg>
     </section>
 
-    <!-- ============ ESTADÍSTICAS (los números los anima main.js) ============ -->
+    <!-- ============ CIFRAS (los números los anima main.js) ============ -->
+    <!-- REVISAR: confirmar años de trayectoria, matrícula y n° de profesionales -->
     <section class="stats">
       <div class="container stats__grid">
         <div class="stat">
-          <span class="stat__number" data-target="42">0</span>
-          <span class="stat__label">Años de trayectoria</span>
+          <span class="stat__number" data-target="20" data-suffix="+">0</span>
+          <span class="stat__label">Años acompañando familias</span>
         </div>
         <div class="stat">
-          <span class="stat__number" data-target="1200">0</span>
-          <span class="stat__label">Alumnos</span>
+          <span class="stat__number" data-target="120" data-suffix="+">0</span>
+          <span class="stat__label">Estudiantes</span>
         </div>
         <div class="stat">
-          <span class="stat__number" data-target="85">0</span>
-          <span class="stat__label">Docentes</span>
+          <span class="stat__number" data-target="15" data-suffix="+">0</span>
+          <span class="stat__label">Profesionales</span>
         </div>
         <div class="stat">
-          <span class="stat__number" data-target="98" data-suffix="%">0</span>
-          <span class="stat__label">Ingreso a la universidad</span>
+          <span class="stat__number stat__number--text">SNED</span>
+          <span class="stat__label">Excelencia académica 2026-2027</span>
         </div>
       </div>
     </section>
@@ -76,33 +87,43 @@
     <section class="section" id="nosotros">
       <div class="container">
         <p class="section__eyebrow">Nosotros</p>
-        <h2 class="section__title">Una educación con propósito</h2>
+        <h2 class="section__title">Un colegio que se adapta al estudiante</h2>
 
         <div class="about">
           <div class="about__text">
             <p>
-              El Colegio San Martín nació en 1985 con una idea simple: que cada alumno
-              descubra lo que puede llegar a ser. Hoy seguimos con esa misma convicción,
-              apoyados en un equipo docente comprometido y en infraestructura moderna.
+              El <strong>Colegio Diferencial Mostazal</strong> es un establecimiento de
+              educación especial particular subvencionado, ubicado en San Francisco de
+              Mostazal, Región del Libertador General Bernardo O'Higgins.
             </p>
             <p>
-              Trabajamos en grupos reducidos, con seguimiento personalizado y una fuerte
-              apuesta por la tecnología, el deporte y las artes.
+              Trabajamos con estudiantes que presentan necesidades educativas especiales,
+              en cursos reducidos y con un plan de apoyo individual elaborado junto a la
+              familia. Nuestro objetivo no es solo el aprendizaje académico, sino la
+              autonomía, la comunicación y la inclusión real en la comunidad.
+            </p>
+            <p class="about__badge">
+              ⭐ Establecimiento reconocido por el <strong>SNED</strong> (Sistema Nacional de
+              Evaluación del Desempeño) del Ministerio de Educación.
             </p>
           </div>
 
           <ul class="values">
             <li class="value">
-              <h3 class="value__title">Excelencia académica</h3>
-              <p>Plan de estudios actualizado y evaluación continua del aprendizaje.</p>
+              <h3 class="value__title">Atención personalizada</h3>
+              <p>Cursos pequeños y un plan de trabajo distinto para cada estudiante.</p>
             </li>
             <li class="value">
-              <h3 class="value__title">Formación en valores</h3>
-              <p>Respeto, responsabilidad y trabajo en equipo dentro y fuera del aula.</p>
+              <h3 class="value__title">Equipo multidisciplinario</h3>
+              <p>Educadoras diferenciales junto a fonoaudiología, kinesiología y psicología.</p>
             </li>
             <li class="value">
-              <h3 class="value__title">Tecnología aplicada</h3>
-              <p>Aulas equipadas, laboratorio de cómputo y programación desde primaria.</p>
+              <h3 class="value__title">Familia presente</h3>
+              <p>Las familias participan del proceso y reciben orientación permanente.</p>
+            </li>
+            <li class="value">
+              <h3 class="value__title">Autonomía e inclusión</h3>
+              <p>Habilidades para la vida diaria y preparación para el mundo laboral.</p>
             </li>
           </ul>
         </div>
@@ -110,108 +131,163 @@
     </section>
 
     <!-- ============ NIVELES ============ -->
+    <!-- REVISAR: confirmar con el colegio qué niveles imparte realmente y las edades -->
     <section class="section section--alt" id="niveles">
       <div class="container">
         <p class="section__eyebrow">Niveles</p>
-        <h2 class="section__title">Nuestra propuesta educativa</h2>
+        <h2 class="section__title">Nuestros niveles de enseñanza</h2>
 
         <div class="levels">
           <article class="level">
-            <div class="level__badge">Inicial</div>
-            <h3 class="level__title">3 a 5 años</h3>
-            <p class="level__text">Aprendizaje a través del juego, desarrollo motor y primeras habilidades sociales.</p>
+            <div class="level__badge">Nivel 1</div>
+            <h3 class="level__title">Educación Parvularia Especial</h3>
+            <p class="level__text">Estimulación temprana y desarrollo de la comunicación en los primeros años.</p>
             <ul class="level__list">
-              <li>Estimulación temprana</li>
-              <li>Psicomotricidad</li>
-              <li>Inglés lúdico</li>
+              <li>Estimulación del lenguaje</li>
+              <li>Desarrollo psicomotor</li>
+              <li>Juego y socialización</li>
             </ul>
           </article>
 
           <article class="level level--featured">
-            <div class="level__badge">Primaria</div>
-            <h3 class="level__title">1.° a 6.° grado</h3>
-            <p class="level__text">Bases sólidas en comunicación, matemática y ciencias, con acompañamiento cercano.</p>
+            <div class="level__badge">Nivel 2</div>
+            <h3 class="level__title">Educación Básica Especial</h3>
+            <p class="level__text">Currículum adaptado con foco en lectoescritura, cálculo funcional y autonomía.</p>
             <ul class="level__list">
-              <li>Comprensión lectora</li>
-              <li>Robótica e informática</li>
-              <li>Talleres deportivos</li>
+              <li>Lectoescritura funcional</li>
+              <li>Matemática aplicada a la vida diaria</li>
+              <li>Habilidades sociales</li>
             </ul>
           </article>
 
           <article class="level">
-            <div class="level__badge">Secundaria</div>
-            <h3 class="level__title">1.° a 5.° año</h3>
-            <p class="level__text">Preparación académica y vocacional para la universidad y la vida profesional.</p>
+            <div class="level__badge">Nivel 3</div>
+            <h3 class="level__title">Formación Laboral</h3>
+            <p class="level__text">Talleres que preparan a los jóvenes para la vida adulta y el trabajo.</p>
             <ul class="level__list">
-              <li>Orientación vocacional</li>
-              <li>Preparación preuniversitaria</li>
-              <li>Proyectos de investigación</li>
+              <li>Talleres ocupacionales</li>
+              <li>Vida independiente</li>
+              <li>Prácticas en la comunidad</li>
             </ul>
           </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ EQUIPO ============ -->
+    <section class="section" id="equipo">
+      <div class="container">
+        <p class="section__eyebrow">Equipo</p>
+        <h2 class="section__title">Profesionales que acompañan</h2>
+
+        <div class="team">
+          <div class="team__card">
+            <span class="team__icon" aria-hidden="true">🎓</span>
+            <h3>Educación Diferencial</h3>
+            <p>Profesoras especialistas a cargo de cada curso y de los planes individuales.</p>
+          </div>
+          <div class="team__card">
+            <span class="team__icon" aria-hidden="true">💬</span>
+            <h3>Fonoaudiología</h3>
+            <p>Apoyo en lenguaje, habla, comunicación alternativa y deglución.</p>
+          </div>
+          <div class="team__card">
+            <span class="team__icon" aria-hidden="true">🤸</span>
+            <h3>Kinesiología</h3>
+            <p>Trabajo motor, postural y de coordinación adaptado a cada estudiante.</p>
+          </div>
+          <div class="team__card">
+            <span class="team__icon" aria-hidden="true">🧩</span>
+            <h3>Terapia Ocupacional</h3>
+            <p>Integración sensorial y habilidades para la vida diaria.</p>
+          </div>
+          <div class="team__card">
+            <span class="team__icon" aria-hidden="true">💙</span>
+            <h3>Psicología</h3>
+            <p>Acompañamiento emocional y conductual del estudiante y su familia.</p>
+          </div>
+          <div class="team__card">
+            <span class="team__icon" aria-hidden="true">🤝</span>
+            <h3>Trabajo Social</h3>
+            <p>Vínculo con las familias y con la red de apoyo de la comuna.</p>
+          </div>
         </div>
       </div>
     </section>
 
     <!-- ============ NOTICIAS ============ -->
-    <section class="section" id="noticias">
+    <!-- REVISAR: reemplazar por publicaciones reales del Facebook del colegio -->
+    <section class="section section--alt" id="noticias">
       <div class="container">
         <p class="section__eyebrow">Noticias</p>
-        <h2 class="section__title">Lo último del colegio</h2>
+        <h2 class="section__title">Lo último de nuestra comunidad</h2>
 
         <div class="news">
           <article class="news__card">
             <time class="news__date" datetime="2026-08-15">15 de agosto, 2026</time>
-            <h3 class="news__title">Feria de ciencias 2026</h3>
-            <p>Los alumnos de secundaria presentaron 24 proyectos sobre energías renovables.</p>
-            <a href="#" class="news__link">Leer más</a>
+            <h3 class="news__title">Celebramos el Día del Niño</h3>
+            <p>Una jornada de juegos y actividades preparada por todo el equipo del colegio.</p>
+            <a href="https://www.facebook.com/COLEGIODIFERENCIALMOSTAZAL/" class="news__link" target="_blank" rel="noopener">Ver en Facebook</a>
           </article>
 
           <article class="news__card">
-            <time class="news__date" datetime="2026-08-02">2 de agosto, 2026</time>
-            <h3 class="news__title">Campeonato interescolar</h3>
-            <p>Nuestro equipo de vóley clasificó a la final regional por tercer año consecutivo.</p>
-            <a href="#" class="news__link">Leer más</a>
+            <time class="news__date" datetime="2026-07-10">10 de julio, 2026</time>
+            <h3 class="news__title">Taller para apoderados</h3>
+            <p>Encuentro con las familias para trabajar estrategias de apoyo en el hogar.</p>
+            <a href="https://www.facebook.com/COLEGIODIFERENCIALMOSTAZAL/" class="news__link" target="_blank" rel="noopener">Ver en Facebook</a>
           </article>
 
           <article class="news__card">
-            <time class="news__date" datetime="2026-07-20">20 de julio, 2026</time>
-            <h3 class="news__title">Nuevo laboratorio de cómputo</h3>
-            <p>Inauguramos 30 estaciones de trabajo para los talleres de programación.</p>
-            <a href="#" class="news__link">Leer más</a>
+            <time class="news__date" datetime="2026-05-21">21 de mayo, 2026</time>
+            <h3 class="news__title">Salida pedagógica a la comunidad</h3>
+            <p>Los estudiantes de formación laboral visitaron el comercio local de Mostazal.</p>
+            <a href="https://www.facebook.com/COLEGIODIFERENCIALMOSTAZAL/" class="news__link" target="_blank" rel="noopener">Ver en Facebook</a>
           </article>
         </div>
+
+        <p class="news__more">
+          Publicamos todas nuestras actividades en
+          <a href="https://www.facebook.com/COLEGIODIFERENCIALMOSTAZAL/" target="_blank" rel="noopener">nuestro Facebook</a>.
+        </p>
       </div>
     </section>
 
     <!-- ============ CONTACTO ============ -->
-    <section class="section section--alt" id="contacto">
+    <section class="section" id="contacto">
       <div class="container">
         <p class="section__eyebrow">Contacto</p>
-        <h2 class="section__title">¿Quieres más información?</h2>
+        <h2 class="section__title">Conversemos sobre tu hijo o hija</h2>
 
         <div class="contact">
-          <!-- OJO: este formulario todavía no envía nada a un servidor.
-               Por ahora main.js solo valida los campos. -->
+          <!-- OJO: el formulario todavía NO envía nada a un servidor.
+               main.js solo valida los campos en el navegador. -->
           <form class="form" id="contact-form" novalidate>
             <div class="form__row">
               <label class="form__field">
-                <span>Nombre completo</span>
+                <span>Nombre del apoderado</span>
                 <input type="text" name="nombre" required placeholder="Ej. María Torres">
               </label>
               <label class="form__field">
                 <span>Correo electrónico</span>
-                <input type="email" name="email" required placeholder="maria@correo.com">
+                <input type="email" name="email" required placeholder="maria@correo.cl">
               </label>
             </div>
 
-            <label class="form__field">
-              <span>Nivel de interés</span>
-              <select name="nivel">
-                <option value="inicial">Inicial</option>
-                <option value="primaria">Primaria</option>
-                <option value="secundaria">Secundaria</option>
-              </select>
-            </label>
+            <div class="form__row">
+              <label class="form__field">
+                <span>Teléfono</span>
+                <input type="tel" name="telefono" placeholder="+56 9 1234 5678">
+              </label>
+              <label class="form__field">
+                <span>Nivel de interés</span>
+                <select name="nivel">
+                  <option value="parvularia">Educación Parvularia Especial</option>
+                  <option value="basica">Educación Básica Especial</option>
+                  <option value="laboral">Formación Laboral</option>
+                  <option value="otro">Aún no lo sé</option>
+                </select>
+              </label>
+            </div>
 
             <label class="form__field">
               <span>Mensaje</span>
@@ -224,10 +300,17 @@
 
           <aside class="contact__info">
             <h3 class="contact__info-title">Datos de contacto</h3>
-            <p><strong>Dirección</strong><br>Av. Los Educadores 1234, Lima</p>
-            <p><strong>Teléfono</strong><br>(01) 555-1234</p>
-            <p><strong>Correo</strong><br>informes@colegiosanmartin.edu.pe</p>
-            <p><strong>Horario</strong><br>Lunes a viernes, 8:00 a 16:00</p>
+            <!-- REVISAR: confirmar dirección y teléfono con el colegio antes de publicar -->
+            <p><strong>Dirección</strong><br>Luco 423B, San Francisco de Mostazal<br>Región de O'Higgins</p>
+            <p><strong>Teléfono</strong><br><a href="tel:+56722634462">(72) 263 4462</a></p>
+            <p><strong>Correo</strong><br>contacto@colegiodiferencialmostazal.cl</p>
+            <p><strong>Horario</strong><br>Lunes a viernes, 8:30 a 16:00</p>
+            <p><strong>RBD</strong><br>15747 — Particular subvencionado</p>
+
+            <a href="https://www.facebook.com/COLEGIODIFERENCIALMOSTAZAL/"
+               class="contact__social" target="_blank" rel="noopener">
+              Síguenos en Facebook
+            </a>
           </aside>
         </div>
       </div>
@@ -237,12 +320,17 @@
   <!-- ============ PIE DE PÁGINA ============ -->
   <footer class="footer">
     <div class="container footer__content">
-      <p>&copy; <span id="year">2026</span> Colegio San Martín. Todos los derechos reservados.</p>
+      <div class="footer__brand">
+        <img src="img/logo.svg" alt="" width="40" height="40">
+        <p>Colegio Diferencial Mostazal<br><small>Colegio de Educación Especial · RBD 15747</small></p>
+      </div>
       <ul class="footer__links">
         <li><a href="#nosotros">Nosotros</a></li>
         <li><a href="#niveles">Niveles</a></li>
+        <li><a href="#equipo">Equipo</a></li>
         <li><a href="#contacto">Contacto</a></li>
       </ul>
+      <p class="footer__copy">&copy; <span id="year">2026</span> Todos los derechos reservados.</p>
     </div>
   </footer>
 

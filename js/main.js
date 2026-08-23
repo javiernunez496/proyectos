@@ -1,5 +1,5 @@
 /* =========================================================
-   Colegio San Martín — JavaScript principal
+   Colegio Diferencial Mostazal — JavaScript principal
    Todo el archivo va dentro de un IIFE (función que se ejecuta
    sola) para no dejar variables sueltas en el navegador.
    ========================================================= */
@@ -26,7 +26,8 @@
   /* ---------- 2. CONTADOR ANIMADO DE ESTADÍSTICAS ----------
      IntersectionObserver avisa cuando un elemento entra en pantalla,
      así la animación arranca al llegar el usuario, no al cargar. */
-  const numeros = document.querySelectorAll(".stat__number");
+  // Solo animamos los que tienen data-target (el bloque "SNED" es texto fijo)
+  const numeros = document.querySelectorAll(".stat__number[data-target]");
 
   function animarNumero(elemento) {
     const objetivo = Number(elemento.dataset.target);
@@ -38,7 +39,7 @@
       const avance = Math.min((ahora - inicio) / duracion, 1);
       // easing: empieza rápido y frena al final
       const suave = 1 - Math.pow(1 - avance, 3);
-      elemento.textContent = Math.round(objetivo * suave).toLocaleString("es-PE") + sufijo;
+      elemento.textContent = Math.round(objetivo * suave).toLocaleString("es-CL") + sufijo;
       if (avance < 1) requestAnimationFrame(paso);
     }
 
