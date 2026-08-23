@@ -15,7 +15,8 @@ Pag Colegio/
 ├── js/
 │   └── main.js       Menú móvil, contadores animados, validación del formulario
 ├── img/
-│   └── logo.svg      Logo de la estrella, recreado en vectorial
+│   ├── logo.svg          Estrella (favicon, barra superior, hero)
+│   └── logo-completo.svg Versión horizontal con el nombre
 ├── .gitignore
 └── README.md
 ```
@@ -59,7 +60,7 @@ Estos datos salieron de búsquedas públicas o son texto de ejemplo.
 **Hay que verificarlos antes de publicar el sitio.** En `index.html` están
 marcados con comentarios `<!-- REVISAR -->`.
 
-- [ ] Dirección exacta (puse *Luco 423B*, sin confirmar)
+- [x] ~~Dirección~~ confirmada: Calle El Roble 145, Villa Padelpa
 - [ ] Teléfono (puse *(72) 263 4462*, sin confirmar)
 - [ ] Correo electrónico institucional (el actual es inventado)
 - [ ] Horario de atención
@@ -70,7 +71,7 @@ marcados con comentarios `<!-- REVISAR -->`.
 
 ## Pendientes técnicos
 
-- [ ] Reemplazar `img/logo.svg` por el logo oficial si el colegio tiene el archivo original
+- [ ] Validar el logo actualizado con la dirección del colegio
 - [ ] Añadir fotos reales del colegio en `img/`
 - [ ] Conectar el formulario de contacto (hoy solo valida, no envía nada)
 - [ ] Publicar en GitHub Pages
@@ -91,4 +92,51 @@ git add .
 
 ```bash
 git commit -m "Descripción del cambio"
+```
+
+## Flujo de ramas
+
+```
+master   ← versión estable, la que se publica
+  └── dev   ← integración y pruebas
+        └── feature/...   ← una rama por cada cosa nueva (locales)
+```
+
+**Regla:** nunca trabajes directo sobre `master`. Cada cambio nace en una rama
+propia, se prueba en `dev`, y solo cuando funciona se lleva a `master`.
+
+Crear una rama para algo nuevo:
+
+```bash
+git switch dev
+```
+
+```bash
+git switch -c feature/galeria-de-fotos
+```
+
+Al terminar, integrarla a `dev`:
+
+```bash
+git switch dev
+```
+
+```bash
+git merge feature/galeria-de-fotos
+```
+
+Y cuando `dev` esté probado y estable, pasarlo a `master`:
+
+```bash
+git switch master
+```
+
+```bash
+git merge dev
+```
+
+Ver en qué rama estás y cuáles existen:
+
+```bash
+git branch
 ```

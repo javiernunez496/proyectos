@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 430 128" role="img" aria-label="Colegio Diferencial Mostazal">
+  <!-- Versión horizontal del logo: estrella + nombre.
+       Sirve para membretes, documentos y la cabecera del sitio. -->
+  <defs>
+    <linearGradient id="estrella2" x1="20%" y1="8%" x2="78%" y2="95%">
+      <stop offset="0%"   stop-color="#FFE372"/>
+      <stop offset="52%"  stop-color="#FFD23F"/>
+      <stop offset="100%" stop-color="#FFB800"/>
+    </linearGradient>
+    <linearGradient id="estela2" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#FFE372" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#FFD23F" stop-opacity="0.08"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Estrella (mismo dibujo que logo.svg, reescalado) -->
+  <g transform="translate(6,14) scale(1.0)">
+    <path d="M63 25 C 76 13, 89 6, 99 3 C 92 14, 80 25, 69 32 Z" fill="url(#estela2)"/>
+    <polygon points="50,14 59.8,38.3 86,39.7 65.6,56.3 72.4,81.6 50,67.4 27.6,81.6 34.4,56.3 14,39.7 40.2,38.3"
+             fill="url(#estrella2)" stroke="url(#estrella2)"
+             stroke-width="13" stroke-linejoin="round"/>
+    <g fill="#FF9E5E" opacity="0.5">
+      <ellipse cx="35.5" cy="55.5" rx="4.6" ry="3.1"/>
+      <ellipse cx="64.5" cy="55.5" rx="4.6" ry="3.1"/>
+    </g>
+    <g fill="#2B4B7A">
+      <ellipse cx="41.5" cy="47" rx="3.5" ry="4.4"/>
+      <ellipse cx="58.5" cy="47" rx="3.5" ry="4.4"/>
+    </g>
+    <g fill="#FFFFFF" opacity="0.9">
+      <circle cx="40.3" cy="45.4" r="1.15"/>
+      <circle cx="57.3" cy="45.4" r="1.15"/>
+    </g>
+    <path d="M42 58.5 Q 50 65.5, 58 58.5" fill="none" stroke="#2B4B7A"
+          stroke-width="2.8" stroke-linecap="round"/>
+  </g>
+
+  <!-- Nombre -->
+  <g font-family="'Nunito', 'Segoe UI', system-ui, sans-serif">
+    <text x="122" y="52" fill="#14508F" font-size="27" font-weight="800"
+          letter-spacing="0.5">COLEGIO DIFERENCIAL</text>
+    <text x="122" y="97" fill="#EE4B2B" font-size="43" font-weight="900"
+          letter-spacing="2.5">MOSTAZAL</text>
+    <!-- Línea de acento bajo el nombre -->
+    <rect x="124" y="105" width="96" height="4" rx="2" fill="#FFD23F"/>
+  </g>
+</svg>
