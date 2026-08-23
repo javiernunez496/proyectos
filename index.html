@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <!-- Metadatos: no se ven en la pagina, pero los lee el navegador y Google -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Colegio San Martín — Educación integral desde inicial hasta secundaria.">
+  <title>Colegio San Martín</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ============ CABECERA / NAVEGACIÓN ============ -->
+  <header class="header" id="inicio">
+    <nav class="nav container">
+      <a href="#inicio" class="nav__logo">
+        <span class="nav__logo-icon">SM</span>
+        Colegio San Martín
+      </a>
+
+      <!-- Botón que solo aparece en móvil (lo controla js/main.js) -->
+      <button class="nav__toggle" id="nav-toggle" aria-label="Abrir menú" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+
+      <ul class="nav__menu" id="nav-menu">
+        <li><a href="#inicio" class="nav__link">Inicio</a></li>
+        <li><a href="#nosotros" class="nav__link">Nosotros</a></li>
+        <li><a href="#niveles" class="nav__link">Niveles</a></li>
+        <li><a href="#noticias" class="nav__link">Noticias</a></li>
+        <li><a href="#contacto" class="nav__link nav__link--btn">Contacto</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <!-- ============ HERO (primera pantalla) ============ -->
+    <section class="hero">
+      <div class="container hero__content">
+        <p class="hero__eyebrow">Matrículas abiertas 2027</p>
+        <h1 class="hero__title">Formamos personas,<br>no solo estudiantes</h1>
+        <p class="hero__text">
+          Más de 40 años brindando educación integral, con docentes calificados
+          y una comunidad que acompaña a cada alumno en su crecimiento.
+        </p>
+        <div class="hero__actions">
+          <a href="#contacto" class="btn btn--primary">Solicitar información</a>
+          <a href="#niveles" class="btn btn--ghost">Ver niveles</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ ESTADÍSTICAS (los números los anima main.js) ============ -->
+    <section class="stats">
+      <div class="container stats__grid">
+        <div class="stat">
+          <span class="stat__number" data-target="42">0</span>
+          <span class="stat__label">Años de trayectoria</span>
+        </div>
+        <div class="stat">
+          <span class="stat__number" data-target="1200">0</span>
+          <span class="stat__label">Alumnos</span>
+        </div>
+        <div class="stat">
+          <span class="stat__number" data-target="85">0</span>
+          <span class="stat__label">Docentes</span>
+        </div>
+        <div class="stat">
+          <span class="stat__number" data-target="98" data-suffix="%">0</span>
+          <span class="stat__label">Ingreso a la universidad</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ NOSOTROS ============ -->
+    <section class="section" id="nosotros">
+      <div class="container">
+        <p class="section__eyebrow">Nosotros</p>
+        <h2 class="section__title">Una educación con propósito</h2>
+
+        <div class="about">
+          <div class="about__text">
+            <p>
+              El Colegio San Martín nació en 1985 con una idea simple: que cada alumno
+              descubra lo que puede llegar a ser. Hoy seguimos con esa misma convicción,
+              apoyados en un equipo docente comprometido y en infraestructura moderna.
+            </p>
+            <p>
+              Trabajamos en grupos reducidos, con seguimiento personalizado y una fuerte
+              apuesta por la tecnología, el deporte y las artes.
+            </p>
+          </div>
+
+          <ul class="values">
+            <li class="value">
+              <h3 class="value__title">Excelencia académica</h3>
+              <p>Plan de estudios actualizado y evaluación continua del aprendizaje.</p>
+            </li>
+            <li class="value">
+              <h3 class="value__title">Formación en valores</h3>
+              <p>Respeto, responsabilidad y trabajo en equipo dentro y fuera del aula.</p>
+            </li>
+            <li class="value">
+              <h3 class="value__title">Tecnología aplicada</h3>
+              <p>Aulas equipadas, laboratorio de cómputo y programación desde primaria.</p>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ NIVELES ============ -->
+    <section class="section section--alt" id="niveles">
+      <div class="container">
+        <p class="section__eyebrow">Niveles</p>
+        <h2 class="section__title">Nuestra propuesta educativa</h2>
+
+        <div class="levels">
+          <article class="level">
+            <div class="level__badge">Inicial</div>
+            <h3 class="level__title">3 a 5 años</h3>
+            <p class="level__text">Aprendizaje a través del juego, desarrollo motor y primeras habilidades sociales.</p>
+            <ul class="level__list">
+              <li>Estimulación temprana</li>
+              <li>Psicomotricidad</li>
+              <li>Inglés lúdico</li>
+            </ul>
+          </article>
+
+          <article class="level level--featured">
+            <div class="level__badge">Primaria</div>
+            <h3 class="level__title">1.° a 6.° grado</h3>
+            <p class="level__text">Bases sólidas en comunicación, matemática y ciencias, con acompañamiento cercano.</p>
+            <ul class="level__list">
+              <li>Comprensión lectora</li>
+              <li>Robótica e informática</li>
+              <li>Talleres deportivos</li>
+            </ul>
+          </article>
+
+          <article class="level">
+            <div class="level__badge">Secundaria</div>
+            <h3 class="level__title">1.° a 5.° año</h3>
+            <p class="level__text">Preparación académica y vocacional para la universidad y la vida profesional.</p>
+            <ul class="level__list">
+              <li>Orientación vocacional</li>
+              <li>Preparación preuniversitaria</li>
+              <li>Proyectos de investigación</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ NOTICIAS ============ -->
+    <section class="section" id="noticias">
+      <div class="container">
+        <p class="section__eyebrow">Noticias</p>
+        <h2 class="section__title">Lo último del colegio</h2>
+
+        <div class="news">
+          <article class="news__card">
+            <time class="news__date" datetime="2026-08-15">15 de agosto, 2026</time>
+            <h3 class="news__title">Feria de ciencias 2026</h3>
+            <p>Los alumnos de secundaria presentaron 24 proyectos sobre energías renovables.</p>
+            <a href="#" class="news__link">Leer más</a>
+          </article>
+
+          <article class="news__card">
+            <time class="news__date" datetime="2026-08-02">2 de agosto, 2026</time>
+            <h3 class="news__title">Campeonato interescolar</h3>
+            <p>Nuestro equipo de vóley clasificó a la final regional por tercer año consecutivo.</p>
+            <a href="#" class="news__link">Leer más</a>
+          </article>
+
+          <article class="news__card">
+            <time class="news__date" datetime="2026-07-20">20 de julio, 2026</time>
+            <h3 class="news__title">Nuevo laboratorio de cómputo</h3>
+            <p>Inauguramos 30 estaciones de trabajo para los talleres de programación.</p>
+            <a href="#" class="news__link">Leer más</a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CONTACTO ============ -->
+    <section class="section section--alt" id="contacto">
+      <div class="container">
+        <p class="section__eyebrow">Contacto</p>
+        <h2 class="section__title">¿Quieres más información?</h2>
+
+        <div class="contact">
+          <!-- OJO: este formulario todavía no envía nada a un servidor.
+               Por ahora main.js solo valida los campos. -->
+          <form class="form" id="contact-form" novalidate>
+            <div class="form__row">
+              <label class="form__field">
+                <span>Nombre completo</span>
+                <input type="text" name="nombre" required placeholder="Ej. María Torres">
+              </label>
+              <label class="form__field">
+                <span>Correo electrónico</span>
+                <input type="email" name="email" required placeholder="maria@correo.com">
+              </label>
+            </div>
+
+            <label class="form__field">
+              <span>Nivel de interés</span>
+              <select name="nivel">
+                <option value="inicial">Inicial</option>
+                <option value="primaria">Primaria</option>
+                <option value="secundaria">Secundaria</option>
+              </select>
+            </label>
+
+            <label class="form__field">
+              <span>Mensaje</span>
+              <textarea name="mensaje" rows="4" placeholder="Cuéntanos en qué podemos ayudarte"></textarea>
+            </label>
+
+            <button type="submit" class="btn btn--primary">Enviar mensaje</button>
+            <p class="form__status" id="form-status" role="status"></p>
+          </form>
+
+          <aside class="contact__info">
+            <h3 class="contact__info-title">Datos de contacto</h3>
+            <p><strong>Dirección</strong><br>Av. Los Educadores 1234, Lima</p>
+            <p><strong>Teléfono</strong><br>(01) 555-1234</p>
+            <p><strong>Correo</strong><br>informes@colegiosanmartin.edu.pe</p>
+            <p><strong>Horario</strong><br>Lunes a viernes, 8:00 a 16:00</p>
+          </aside>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============ PIE DE PÁGINA ============ -->
+  <footer class="footer">
+    <div class="container footer__content">
+      <p>&copy; <span id="year">2026</span> Colegio San Martín. Todos los derechos reservados.</p>
+      <ul class="footer__links">
+        <li><a href="#nosotros">Nosotros</a></li>
+        <li><a href="#niveles">Niveles</a></li>
+        <li><a href="#contacto">Contacto</a></li>
+      </ul>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

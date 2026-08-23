@@ -1,0 +1,465 @@
+/* =========================================================
+   Colegio San Martín — hoja de estilos principal
+   Orden del archivo:
+     1. Variables      2. Reset      3. Utilidades
+     4. Componentes    5. Secciones  6. Responsive
+   ========================================================= */
+
+/* ---------- 1. VARIABLES ----------
+   Cambia estos valores y cambia toda la web de golpe. */
+:root {
+  --azul: #1e3a8a;
+  --azul-osc: #152a63;
+  --azul-claro: #3b5fc0;
+  --dorado: #d4a017;
+  --texto: #1f2430;
+  --texto-suave: #5b6478;
+  --fondo: #ffffff;
+  --fondo-alt: #f5f7fb;
+  --borde: #e2e8f0;
+
+  --radio: 12px;
+  --sombra: 0 4px 16px rgba(21, 42, 99, 0.08);
+  --sombra-alta: 0 12px 32px rgba(21, 42, 99, 0.16);
+  --ancho: 1120px;
+  --transicion: 0.25s ease;
+}
+
+/* ---------- 2. RESET ----------
+   Los navegadores traen márgenes por defecto; los quitamos
+   para partir siempre desde el mismo punto. */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: var(--texto);
+  background: var(--fondo);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+img { max-width: 100%; display: block; }
+ul { list-style: none; }
+a { text-decoration: none; color: inherit; }
+
+/* ---------- 3. UTILIDADES ---------- */
+.container {
+  width: 100%;
+  max-width: var(--ancho);
+  margin-inline: auto;
+  padding-inline: 20px;
+}
+
+.section { padding: 80px 0; }
+.section--alt { background: var(--fondo-alt); }
+
+.section__eyebrow {
+  color: var(--dorado);
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.section__title {
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  line-height: 1.2;
+  margin-bottom: 40px;
+}
+
+/* ---------- 4. COMPONENTES ---------- */
+
+/* Botones */
+.btn {
+  display: inline-block;
+  padding: 13px 28px;
+  border: 2px solid transparent;
+  border-radius: var(--radio);
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: transform var(--transicion), background var(--transicion),
+              box-shadow var(--transicion);
+}
+.btn:hover { transform: translateY(-2px); }
+
+.btn--primary {
+  background: var(--dorado);
+  color: #17233f;
+  box-shadow: var(--sombra);
+}
+.btn--primary:hover { background: #e5ae1c; box-shadow: var(--sombra-alta); }
+
+.btn--ghost {
+  border-color: rgba(255, 255, 255, 0.5);
+  color: #fff;
+}
+.btn--ghost:hover { background: rgba(255, 255, 255, 0.12); }
+
+/* Cabecera y navegación */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--azul);
+  box-shadow: var(--sombra);
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 72px;
+}
+
+.nav__logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.nav__logo-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--dorado);
+  color: var(--azul-osc);
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.nav__menu { display: flex; align-items: center; gap: 8px; }
+
+.nav__link {
+  display: block;
+  padding: 10px 16px;
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.88);
+  font-weight: 500;
+  transition: background var(--transicion), color var(--transicion);
+}
+.nav__link:hover { background: rgba(255, 255, 255, 0.12); color: #fff; }
+
+.nav__link--btn {
+  background: var(--dorado);
+  color: var(--azul-osc);
+  font-weight: 700;
+}
+.nav__link--btn:hover { background: #e5ae1c; color: var(--azul-osc); }
+
+/* Botón hamburguesa (solo móvil) */
+.nav__toggle {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  padding: 8px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.nav__toggle span {
+  width: 24px;
+  height: 2px;
+  background: #fff;
+  border-radius: 2px;
+  transition: var(--transicion);
+}
+
+/* ---------- 5. SECCIONES ---------- */
+
+/* Hero */
+.hero {
+  background: linear-gradient(135deg, var(--azul-osc), var(--azul) 55%, var(--azul-claro));
+  color: #fff;
+  padding: 100px 0;
+  text-align: center;
+}
+
+.hero__content { max-width: 760px; }
+
+.hero__eyebrow {
+  display: inline-block;
+  padding: 6px 16px;
+  margin-bottom: 20px;
+  border-radius: 999px;
+  background: rgba(212, 160, 23, 0.2);
+  color: var(--dorado);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.hero__title {
+  font-size: clamp(2rem, 6vw, 3.4rem);
+  line-height: 1.15;
+  margin-bottom: 20px;
+}
+
+.hero__text {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 32px;
+}
+
+.hero__actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Estadísticas */
+.stats {
+  background: var(--fondo-alt);
+  border-bottom: 1px solid var(--borde);
+  padding: 40px 0;
+}
+
+.stats__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  text-align: center;
+}
+
+.stat__number {
+  display: block;
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  font-weight: 800;
+  color: var(--azul);
+  line-height: 1.1;
+}
+
+.stat__label {
+  font-size: 0.9rem;
+  color: var(--texto-suave);
+}
+
+/* Nosotros */
+.about {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: start;
+}
+
+.about__text p { margin-bottom: 16px; color: var(--texto-suave); font-size: 1.05rem; }
+
+.values { display: grid; gap: 16px; }
+
+.value {
+  padding: 20px 24px;
+  background: var(--fondo-alt);
+  border-left: 4px solid var(--dorado);
+  border-radius: 0 var(--radio) var(--radio) 0;
+}
+
+.value__title { font-size: 1.05rem; margin-bottom: 4px; color: var(--azul); }
+.value p { color: var(--texto-suave); font-size: 0.95rem; }
+
+/* Niveles */
+.levels {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.level {
+  background: #fff;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: 28px;
+  transition: transform var(--transicion), box-shadow var(--transicion);
+}
+.level:hover { transform: translateY(-6px); box-shadow: var(--sombra-alta); }
+
+.level--featured {
+  border-color: var(--dorado);
+  border-width: 2px;
+  box-shadow: var(--sombra);
+}
+
+.level__badge {
+  display: inline-block;
+  padding: 4px 14px;
+  margin-bottom: 12px;
+  border-radius: 999px;
+  background: var(--azul);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.level__title { font-size: 1.3rem; margin-bottom: 8px; }
+.level__text { color: var(--texto-suave); margin-bottom: 16px; }
+
+.level__list { display: grid; gap: 8px; }
+.level__list li {
+  position: relative;
+  padding-left: 24px;
+  font-size: 0.95rem;
+  color: var(--texto-suave);
+}
+.level__list li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: var(--dorado);
+  font-weight: 700;
+}
+
+/* Noticias */
+.news {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.news__card {
+  padding: 24px;
+  background: var(--fondo-alt);
+  border-radius: var(--radio);
+  transition: transform var(--transicion), box-shadow var(--transicion);
+}
+.news__card:hover { transform: translateY(-4px); box-shadow: var(--sombra); }
+
+.news__date {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--dorado);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.news__title { font-size: 1.15rem; margin-bottom: 8px; }
+.news__card p { color: var(--texto-suave); font-size: 0.95rem; margin-bottom: 12px; }
+
+.news__link { color: var(--azul); font-weight: 600; font-size: 0.95rem; }
+.news__link:hover { text-decoration: underline; }
+
+/* Contacto */
+.contact {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 40px;
+  align-items: start;
+}
+
+.form { display: grid; gap: 18px; }
+.form__row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+
+.form__field { display: grid; gap: 6px; }
+.form__field > span { font-weight: 600; font-size: 0.9rem; }
+
+.form__field input,
+.form__field select,
+.form__field textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  background: #fff;
+  font: inherit;
+  color: inherit;
+  transition: border-color var(--transicion), box-shadow var(--transicion);
+}
+
+.form__field input:focus,
+.form__field select:focus,
+.form__field textarea:focus {
+  outline: none;
+  border-color: var(--azul);
+  box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.12);
+}
+
+/* Clase que añade main.js cuando un campo está mal */
+.form__field input.is-error,
+.form__field textarea.is-error { border-color: #dc2626; }
+
+.form__field textarea { resize: vertical; }
+
+.form button { justify-self: start; }
+
+.form__status { font-size: 0.95rem; font-weight: 600; min-height: 1.4em; }
+.form__status.is-ok { color: #15803d; }
+.form__status.is-bad { color: #dc2626; }
+
+.contact__info {
+  padding: 28px;
+  background: #fff;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+}
+.contact__info-title { color: var(--azul); margin-bottom: 16px; }
+.contact__info p { margin-bottom: 14px; color: var(--texto-suave); font-size: 0.95rem; }
+.contact__info strong { color: var(--texto); }
+
+/* Pie de página */
+.footer {
+  background: var(--azul-osc);
+  color: rgba(255, 255, 255, 0.75);
+  padding: 32px 0;
+  font-size: 0.92rem;
+}
+
+.footer__content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.footer__links { display: flex; gap: 20px; }
+.footer__links a:hover { color: #fff; }
+
+/* ---------- 6. RESPONSIVE ----------
+   Se aplica solo cuando la pantalla es más angosta que el límite. */
+@media (max-width: 900px) {
+  .about,
+  .contact { grid-template-columns: 1fr; }
+  .levels,
+  .news { grid-template-columns: 1fr 1fr; }
+  .stats__grid { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 640px) {
+  .section { padding: 56px 0; }
+  .hero { padding: 72px 0; }
+
+  .nav__toggle { display: flex; }
+
+  /* Menú móvil: oculto arriba y se despliega al pulsar la hamburguesa */
+  .nav__menu {
+    position: absolute;
+    top: 72px;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+    padding: 16px 20px 24px;
+    background: var(--azul);
+    box-shadow: var(--sombra);
+    clip-path: inset(0 0 100% 0);
+    transition: clip-path 0.3s ease;
+  }
+  .nav__menu.is-open { clip-path: inset(0 0 0 0); }
+
+  .nav__link { text-align: center; }
+
+  .levels,
+  .news,
+  .form__row { grid-template-columns: 1fr; }
+
+  .footer__content { flex-direction: column; text-align: center; }
+}
