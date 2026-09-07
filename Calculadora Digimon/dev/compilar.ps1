@@ -190,7 +190,12 @@ $contenido
 </body>
 </html>
 "@
-$suelto = $suelto.Replace("`r`n", "`n") + "`n"
+# Nada de normalizar saltos de línea: build.mjs no lo hace, y hacerlo aquí
+# rompía la igualdad byte a byte en cuanto las fuentes quedaban en CRLF. El
+# salto final se toma del propio documento, que es lo que hace la plantilla de
+# build.mjs al terminar con un salto antes de cerrar.
+$nl = if ($suelto -match "`r`n") { "`r`n" } else { "`n" }
+$suelto = $suelto + $nl
 
 [IO.File]::WriteAllText((Join-Path $dist 'index.html'), $suelto, $utf8SinBom)
 
