@@ -30,7 +30,8 @@ function imageDataUri(id) {
 
 const images = {};
 const missing = [];
-for (const c of deckObj.cards) {
+// Las 50 y el mazo de huevos: los Digi-Egg también se ven en la lista.
+for (const c of [...deckObj.cards, ...(deckObj.eggs || [])]) {
   if (!c.id) continue;
   const uri = imageDataUri(c.id);
   if (uri) images[c.id] = uri;
@@ -49,8 +50,10 @@ if (missing.length) {
 // Catálogo para el importador de listas: con él, pegar "4 Jupitermon BT24-101"
 // basta para saber que es un Lv.6 de coste 12 y 13000 DP. Va comprimido a
 // [id, nombre, grupo, coste, DP] porque son 4412 cartas y viajan en el HTML.
+// Estos índices los lee src/app.js tal cual: si cambian aquí, cambian allí.
 const GROUPS = ["Lv.3", "Lv.4", "Lv.5", "Lv.6", "Lv.7", "Tamer", "Option"];
-const OUT_OF_DECK = GROUPS.length; // huevos y cartas sin nivel: no van en las 50
+const EGG = GROUPS.length;             // 7 · Lv.2, va al mazo de huevos
+const OUT_OF_DECK = GROUPS.length + 1; // 8 · ni en las 50 ni en los huevos
 let carddb = "[]";
 try {
   const index = JSON.parse(read("data/cards/index.json"));
@@ -58,6 +61,7 @@ try {
     let g = OUT_OF_DECK;
     if (c.type === "Tamer") g = 5;
     else if (c.type === "Option") g = 6;
+    else if (c.type === "Digi-Egg" || c.level === 2) g = EGG;
     else if (c.level >= 3 && c.level <= 7) g = c.level - 3;
     return [c.id, c.name, g, c.cost || 0, c.dp || 0];
   });

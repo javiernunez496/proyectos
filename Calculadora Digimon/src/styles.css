@@ -7,7 +7,7 @@
   --good:#0ca30c; --warn:#fab219; --crit:#d03b3b;
   /* categorical, validated (adjacent pairlist, light surface #FAFBFD) */
   --s-lv3:#2a78d6; --s-lv4:#eb6834; --s-lv5:#1baf7a; --s-lv6:#4a3aa7;
-  --s-lv7:#e87ba4; --s-tamer:#008300; --s-option:#eda100;
+  --s-lv7:#e87ba4; --s-tamer:#008300; --s-option:#eda100; --s-lv2:#0e8fa6;
   /* ordinal amber ramp, validated light */
   --o1:#D6A238; --o2:#AE7815; --o3:#754E06;
   --track:#DDE1EA;
@@ -22,7 +22,7 @@
     --line:#2C3140; --line-strong:#3A4053;
     --accent:#F0BE4E; --accent-fill:#C99229; --accent-soft:rgba(240,190,78,.14);
     --s-lv3:#3987e5; --s-lv4:#d95926; --s-lv5:#199e70; --s-lv6:#9085e9;
-    --s-lv7:#d55181; --s-tamer:#008300; --s-option:#c98500;
+    --s-lv7:#d55181; --s-tamer:#008300; --s-option:#c98500; --s-lv2:#2fb0c6;
     --o1:#8A6417; --o2:#C99229; --o3:#F2C15A;
     --track:#2C3140;
     --ring:rgba(255,255,255,.10);
@@ -36,7 +36,7 @@
   --line:#2C3140; --line-strong:#3A4053;
   --accent:#F0BE4E; --accent-fill:#C99229; --accent-soft:rgba(240,190,78,.14);
   --s-lv3:#3987e5; --s-lv4:#d95926; --s-lv5:#199e70; --s-lv6:#9085e9;
-  --s-lv7:#d55181; --s-tamer:#008300; --s-option:#c98500;
+  --s-lv7:#d55181; --s-tamer:#008300; --s-option:#c98500; --s-lv2:#2fb0c6;
   --o1:#8A6417; --o2:#C99229; --o3:#F2C15A;
   --track:#2C3140;
   --ring:rgba(255,255,255,.10);
@@ -84,6 +84,16 @@ h1 .bolt{color:var(--accent)}
 .dot-status{width:8px; height:8px; border-radius:50%; flex:0 0 auto}
 .ok .dot-status{background:var(--good)} .ok{color:var(--good)}
 .bad .dot-status{background:var(--crit)} .bad{color:var(--crit)}
+
+/* Contador del mazo de huevos. Va aparte del medidor de 50 a propósito: son
+   dos mazos distintos y no deben leerse como una sola cuenta. */
+.meter-eggs{
+  display:flex; align-items:center; gap:7px; font-size:12px; color:var(--muted);
+  padding-top:8px; border-top:1px solid var(--line);
+}
+.meter-eggs .sw{width:8px; height:8px; border-radius:2px; flex:0 0 auto; background:var(--s-lv2)}
+.meter-eggs b{margin-left:auto; font-variant-numeric:tabular-nums; color:var(--ink-2); font-weight:600}
+.meter-eggs.bad b{color:var(--crit)}
 
 /* ---------- insight strip ---------- */
 .strip{
@@ -178,6 +188,86 @@ h1 .bolt{color:var(--accent)}
   font-family:"IBM Plex Sans",sans-serif; font-size:11.5px; font-weight:500;
 }
 .addgrp:hover{border-color:var(--accent-fill); color:var(--accent); background:var(--accent-soft)}
+.addgrp:disabled{opacity:.4; cursor:default}
+.addgrp:disabled:hover{border-color:var(--line-strong); color:var(--muted); background:transparent}
+.addgrp.open{border-style:solid; border-color:var(--accent-fill); color:var(--accent); background:var(--accent-soft)}
+
+/* ---------- selector de cartas ---------- */
+/* Se abre bajo el botón de añadir, dentro de la propia lista: la carta se elige
+   donde va a caer, sin diálogo que tape el mazo. */
+.picker{
+  margin:0 18px 10px; border:1px solid var(--line-strong); border-radius:6px;
+  background:var(--surface); overflow:hidden;
+}
+.pk-head{
+  display:flex; gap:6px; align-items:center; padding:8px;
+  border-bottom:1px solid var(--line); background:var(--surface-2);
+}
+.pk-q{
+  flex:1 1 120px; min-width:0; font-family:"IBM Plex Sans",sans-serif; font-size:12.5px;
+  color:var(--ink); background:var(--surface); border:1px solid var(--line-strong);
+  border-radius:4px; padding:5px 8px;
+}
+.pk-q:focus{border-color:var(--accent-fill); outline:none}
+.pk-set{
+  flex:0 1 auto; max-width:175px; font-family:"IBM Plex Mono",monospace; font-size:11px;
+  color:var(--ink-2); background:var(--surface); border:1px solid var(--line-strong);
+  border-radius:4px; padding:5px 4px;
+}
+.pk-x{
+  flex:0 0 auto; width:26px; height:26px; padding:0; border:0; border-radius:4px;
+  background:transparent; color:var(--muted); cursor:pointer;
+  font-family:"IBM Plex Sans",sans-serif; font-size:17px; line-height:1;
+}
+.pk-x:hover{background:var(--crit); color:#fff}
+/* Solo se desplaza en vertical: fijar un eje pone el otro en auto, y salía una
+   barra horizontal que no hacía falta. */
+.pk-list{max-height:270px; overflow-y:auto; overflow-x:hidden}
+.pk-row{
+  display:flex; align-items:center; gap:10px; width:100%; text-align:left;
+  padding:5px 10px; border:0; border-bottom:1px solid var(--line);
+  background:transparent; cursor:pointer; font-family:inherit;
+}
+.pk-row:last-child{border-bottom:0}
+.pk-row:hover{background:var(--accent-soft)}
+.pk-row .thumb{
+  flex:0 0 auto; width:26px; aspect-ratio:300/409; border-radius:2px;
+  border:1px solid var(--line); background-color:var(--surface-3);
+  background-position:center; background-size:cover; background-repeat:no-repeat;
+}
+.pk-info{flex:1 1 auto; min-width:0}
+.pk-nm{
+  display:block; font-family:"IBM Plex Sans",sans-serif; font-size:12.5px; font-weight:500;
+  color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.pk-meta{
+  display:flex; align-items:center; gap:5px;
+  font-family:"IBM Plex Mono",monospace; font-size:10px; color:var(--muted);
+}
+.pk-meta .cid{padding:1px 4px; border-radius:3px; background:var(--surface-3); font-size:9.5px}
+.pk-add{flex:0 0 auto; color:var(--muted); font-size:15px; line-height:1}
+.pk-row:hover .pk-add{color:var(--accent)}
+.pk-empty{padding:12px 10px; font-size:11.5px; color:var(--muted); text-align:center}
+.pk-foot{
+  display:flex; align-items:center; gap:10px; padding:7px 10px;
+  border-top:1px solid var(--line); background:var(--surface-2);
+}
+.pk-count{font-family:"IBM Plex Mono",monospace; font-size:10.5px; color:var(--muted)}
+.pk-count.warn{color:var(--crit)}
+.pk-foot .btn{margin-left:auto}
+
+/* Bloque de Digi-Egg. Va sobre fondo propio porque es OTRO mazo, no otro
+   grupo dentro de las 50: leerlo como una sección más sería engañoso. */
+.eggblock{
+  margin:14px 0 4px; padding-bottom:4px;
+  background:var(--surface-2); border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+}
+.eggblock .row:hover{background:var(--surface-3)}
+.grp-head .cap{
+  font-family:"IBM Plex Sans",sans-serif; font-size:10.5px; font-weight:400;
+  letter-spacing:0; text-transform:none; color:var(--muted);
+}
+.grp-head .ct.over{color:var(--crit)}
 
 .step{display:flex; align-items:center; gap:0; border:1px solid var(--line-strong); border-radius:5px; overflow:hidden; background:var(--surface)}
 .step button{

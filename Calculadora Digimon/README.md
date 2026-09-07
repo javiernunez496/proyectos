@@ -1,8 +1,11 @@
-# Calculadora Digimon
+# Digimon Analytics
 
 Calculadora de probabilidad de mano inicial para el **Digimon Card Game**, hecha
-para un mazo concreto de 50 cartas (Aegiomon → Aegiochusmon → Jupitermon).
-Página estática, sin dependencias, sin servidor.
+para un mazo concreto de 50 cartas (Aegiomon → Aegiochusmon → Jupitermon), más su
+mazo de Digi-Egg aparte. Página estática, sin dependencias, sin servidor.
+
+(El repositorio y la carpeta siguen llamándose «Calculadora Digimon»;
+*Digimon Analytics* es el nombre de la página.)
 
 Todos los números son **combinatoria exacta** (distribución hipergeométrica), no
 simulación. El simulador que trae la página existe solo para verlos converger.
@@ -47,6 +50,10 @@ mira las `n + s` cartas de arriba a la vez.
 .
 ├── build.mjs           # une src/ + data/ en dist/. Sin dependencias.
 ├── watch.mjs           # reconstruye al guardar
+├── ver-calculadora.bat # Windows sin Node: compila, sirve y recarga solo
+├── dev/
+│   ├── compilar.ps1    # build.mjs reescrito en PowerShell
+│   └── servidor.ps1    # servidor local con recarga automática
 ├── data/
 │   ├── deck.json       # el mazo: nombre, grupo, coste, DP y copias
 │   ├── deck.linked.json# el mazo con el ID oficial y la imagen de cada carta
@@ -70,7 +77,27 @@ mira las `n + s` cartas de arriba a la vez.
 
 ## Uso
 
-Requiere Node 18 o superior. No hay que instalar nada.
+### Sin instalar nada (Windows)
+
+**Doble clic en `ver-calculadora.bat`.**
+
+Compila, abre la página en `http://localhost:8080` y se queda vigilando:
+cada vez que guardas algo de `src/` o `data/deck.json` **recompila y recarga
+el navegador solo**. Para detenerlo, cierra la ventana negra o Ctrl+C.
+
+Usa `dev/compilar.ps1`, que es `build.mjs` reescrito en PowerShell, y
+`dev/servidor.ps1`, un servidor mínimo. Ambos van sobre el .NET que ya trae
+Windows: no hacen falta Node ni dependencias.
+
+Para compilar una sola vez, sin servidor:
+
+```bash
+powershell -ExecutionPolicy Bypass -File dev\compilar.ps1
+```
+
+### Con Node
+
+Requiere Node 18 o superior. No hay que instalar dependencias.
 
 ```bash
 npm run build     # genera dist/
@@ -78,6 +105,12 @@ npm run watch     # reconstruye cada vez que guardas
 ```
 
 Después abre `dist/index.html`.
+
+> **Los dos compiladores tienen que dar lo mismo.** `build.mjs` y
+> `dev/compilar.ps1` producen la misma salida byte a byte; si tocas uno,
+> toca el otro. Ojo especialmente con los índices de grupo del catálogo
+> (`Tamer` 5, `Option` 6, Digi-Egg 7, fuera del mazo 8): los tres archivos
+> —los dos compiladores y `src/app.js`— tienen que estar de acuerdo.
 
 ## Editar el mazo
 
@@ -87,10 +120,12 @@ Tres caminos, y los tres valen:
    del juego y rehace el mazo entero. Es lo más rápido si vienes de un deck
    builder.
 2. **En la página.** Cambias copias con los `+` / `−`, editas nombres y costes,
-   eliminas cartas con la `×` y añades con el botón de cada categoría. Los
-   cambios viven en la pestaña; al recargar vuelve a `data/deck.json`.
+   eliminas cartas con la `×` y añades con el botón de cada categoría, que abre
+   el **buscador de cartas** (ver abajo). Los cambios viven en la pestaña; al
+   recargar vuelve a `data/deck.json`.
 3. **En `data/deck.json`.** Es la fuente de verdad. Cada carta es
    `{"n": nombre, "g": grupo, "c": coste, "dp": DP, "q": copias, "id": ID}`.
+   Las 50 van en `cards` y los Digi-Egg en `eggs`, con el mismo formato.
    Recompila y listo.
 
 Los grupos válidos son `Lv.3`, `Lv.4`, `Lv.5`, `Lv.6`, `Lv.7`, `Tamer` y `Option`.
@@ -99,6 +134,43 @@ del muro de seguridad para saber qué cartas pueden frenar un ataque. El `id` es
 opcional para el cálculo, pero es lo que distingue dos cartas del mismo nombre
 —este mazo lleva dos Jupitermon, dos Aegiomon y dos Elecmon distintos— y sale
 impreso junto al coste en cada fila.
+
+### Buscador de cartas
+
+«+ Añadir carta a Lv.5» no crea una fila vacía: abre un buscador sobre las 4412
+cartas del catálogo, ahí mismo debajo del botón. Se puede escribir el **nombre o
+el ID**, y acotar por **expansión**. Al pulsar una carta entra con su nivel,
+coste, DP e ID ya puestos; si ya estaba en el mazo, sube una copia en vez de
+duplicar la fila, y se para en 4.
+
+Viene filtrado al grupo cuyo botón pulsaste, y el desplegable de expansión
+permite quitar ese filtro cuando buscas por nombre suelto. Si prefieres escribir
+a mano —o la carta no está en el catálogo— el pie del panel tiene **«Añadir
+carta en blanco»**, que es el comportamiento de antes. Compilado sin catálogo,
+el botón vuelve solo a crear la fila vacía.
+
+La lista de expansiones sale del **prefijo del ID** (`BT24-101` es de `BT24`),
+que es como están numeradas las cartas: los 66 prefijos distintos del catálogo
+son exactamente las 66 expansiones. Por eso el desplegable no cuesta ni un byte
+de datos añadidos al HTML.
+
+### El mazo de Digi-Egg
+
+Los Lv.2 son un **mazo aparte**, con sus propias reglas:
+
+- Hasta **5 cartas** en total.
+- Hasta **4 copias** de una misma carta, igual que en las 50.
+- **No cuentan para las 50** ni para ninguna probabilidad.
+
+Esto último no es un detalle de implementación: los huevos no se barajan con el
+mazo ni se roban, así que meterlos en el cálculo daría números falsos. Viven en
+`S.eggs` en vez de `S.cards`, y todo el motor de probabilidad mira solo
+`S.cards`. Por eso sus filas no traen columnas de «≥1 en mano», ni coste, ni DP:
+en el juego no tienen ninguna de esas tres cosas.
+
+Al pegar una lista, los Digi-Egg se reconocen por el catálogo y se apartan solos.
+Si la lista trae más de 5, se recorta por el final y el informe dice qué se cayó.
+El buscador del bloque de huevos solo muestra Lv.2, y se niega a pasar de 5.
 
 ### Cargar una lista
 

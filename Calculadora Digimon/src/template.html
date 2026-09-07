@@ -1,4 +1,4 @@
-<title>Mano Inicial Jupitermon</title>
+<title>Digimon Analytics</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
@@ -34,7 +34,7 @@ try {
   <header class="top">
     <div class="title-block">
       <div class="eyebrow">Digimon Card Game · Probabilidad de mano inicial</div>
-      <h1>Mano Inicial <span class="bolt">Jupitermon</span></h1>
+      <h1>Digimon <span class="bolt">Analytics</span></h1>
       <p class="lede">Ajusta las copias y mira cómo cambia lo que ves en las primeras 5 cartas. Cálculo <b>hipergeométrico exacto</b>, no simulación.</p>
     </div>
     <div class="meter-box">
@@ -55,6 +55,12 @@ try {
         <div class="gauge-notches" id="notches"></div>
       </div>
       <div class="meter-status ok" id="deck-status"><i class="dot-status"></i><span>Mazo legal</span></div>
+      <!-- Los Digi-Egg son un mazo aparte: no suman a las 50 ni se roban. -->
+      <div class="meter-eggs" id="egg-meter">
+        <i class="sw"></i>
+        <span>Digi-Egg</span>
+        <b class="mono"><span id="egg-n">0</span>/5</b>
+      </div>
     </div>
   </header>
 

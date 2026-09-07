@@ -4,7 +4,15 @@
 /* ---------------- estado ---------------- */
 var GROUPS = ["Lv.3","Lv.4","Lv.5","Lv.6","Lv.7","Tamer","Option"];
 var GVAR = {"Lv.3":"--s-lv3","Lv.4":"--s-lv4","Lv.5":"--s-lv5","Lv.6":"--s-lv6",
-            "Lv.7":"--s-lv7","Tamer":"--s-tamer","Option":"--s-option"};
+            "Lv.7":"--s-lv7","Tamer":"--s-tamer","Option":"--s-option","Lv.2":"--s-lv2"};
+
+/* Los Digi-Egg (Lv.2) son un mazo aparte: hasta 5 cartas, con el mismo tope de
+   4 copias por carta, y no cuentan para las 50. Por eso viven en S.eggs y no en
+   S.cards: nunca se roban, así que no entran en ningún cálculo de probabilidad
+   ni en el simulador. Todo lo que hay debajo de esto sigue mirando solo S.cards. */
+var EGG_GROUP = "Lv.2";
+var EGG_MAX   = 5;   // cartas en el mazo de huevos
+var COPY_MAX  = 4;   // copias de una misma carta, igual que en las 50
 function gcol(g){ return "var(" + (GVAR[g] || "--muted") + ")"; }
 function gcolResolved(g){
   return getComputedStyle(document.documentElement).getPropertyValue(GVAR[g] || "--muted").trim() || "#888";
@@ -21,6 +29,8 @@ function withDefaults(o){
   if (typeof o.dp !== "number") o.dp = 8000;
   if (!o.line) o.line = ["Lv.3","Lv.4","Lv.5","Lv.6"];
   if (!o.series) o.series = ["Lv.3","Lv.4","Lv.5","Lv.6","Lv.7"];
+  // Los mazos guardados antes de que existieran los huevos no traen la clave.
+  if (!Array.isArray(o.eggs)) o.eggs = [];
   return o;
 }
 var INITIAL = withDefaults(JSON.parse(document.getElementById("deck-state").textContent));
@@ -53,6 +63,7 @@ function pAtLeast(k,x,N,n){
 function totalCards(){ var t=0; for (var i=0;i<S.cards.length;i++) t += S.cards[i].q; return t; }
 function groupCount(g){ var t=0; for (var i=0;i<S.cards.length;i++) if (S.cards[i].g===g) t += S.cards[i].q; return t; }
 function handSize(){ return Math.min(S.hand, Math.max(1, totalCards())); }
+function eggCards(){ var t=0; for (var i=0;i<S.eggs.length;i++) t += S.eggs[i].q; return t; }
 
 function fmt(p){ return (p*100).toFixed(2).replace(".", ",") + " %"; }
 function fmt1(p){ return (p*100).toFixed(1).replace(".", ",") + " %"; }
@@ -118,10 +129,15 @@ function renderMeter(){
   st.querySelector("span").textContent = ok ? "Mazo legal"
     : (N > 50 ? "Sobra" + (d === 1 ? "" : "n") + " " + d + pl
               : "Falta" + (d === 1 ? "" : "n") + " " + d + pl);
+
+  var e = eggCards();
+  document.getElementById("egg-n").textContent = e;
+  document.getElementById("egg-meter").classList.toggle("bad", e > EGG_MAX);
 }
 
 /* ---------------- render: lista del mazo ---------------- */
 var focusIdx = null;
+var focusEgg = null;
 
 function cardRow(c, idx, N, n){
   var p1 = c.q ? pAtLeast(c.q,1,N,n) : 0;
@@ -168,7 +184,7 @@ function cardRow(c, idx, N, n){
 
   var btns = r.querySelectorAll(".step button");
   btns[0].disabled = c.q <= 0;
-  btns[1].disabled = c.q >= 4;
+  btns[1].disabled = c.q >= COPY_MAX;
   btns[0].addEventListener("click", function(){ bump(idx,-1); });
   btns[1].addEventListener("click", function(){ bump(idx, 1); });
 
@@ -180,12 +196,96 @@ function cardRow(c, idx, N, n){
   return r;
 }
 
+/* Fila de huevo. Deliberadamente sin las columnas de probabilidad: los Digi-Egg
+   no se roban, así que un "≥1 en mano" ahí sería un número inventado. Tampoco
+   llevan coste ni DP, que en el juego no existen para esta carta. */
+function eggRow(c, idx){
+  var total = eggCards();
+
+  var r = document.createElement("div");
+  r.className = "row" + (c.q === 0 ? " zero" : "");
+  r.innerHTML =
+    '<div class="thumb ' + artClass(c) + '"></div>'
+  + '<div class="info">'
+  +   '<input class="nm" type="text" placeholder="Nombre del Digi-Egg" aria-label="Nombre del Digi-Egg">'
+  +   '<div class="meta"><span class="g"></span><span class="cid"></span></div>'
+  + '</div>'
+  + '<div class="step">'
+  +   '<button aria-label="Quitar copia">−</button>'
+  +   '<div class="q mono">' + c.q + '</div>'
+  +   '<button aria-label="Anadir copia">+</button>'
+  + '</div>'
+  + '<button class="del" title="Eliminar este huevo" aria-label="Eliminar este huevo">×</button>';
+
+  var nm = r.querySelector("input.nm");
+  nm.value = c.n;
+  nm.dataset.e = idx;
+  nm.addEventListener("input", function(){ c.n = this.value; });
+
+  r.querySelector(".meta .g").textContent = EGG_GROUP;
+  r.querySelector(".meta .cid").textContent = c.id || "";
+
+  var btns = r.querySelectorAll(".step button");
+  btns[0].disabled = c.q <= 0;
+  // Dos topes a la vez: 4 copias de esta carta y 5 cartas en el mazo de huevos.
+  btns[1].disabled = c.q >= COPY_MAX || total >= EGG_MAX;
+  btns[0].addEventListener("click", function(){ bumpEgg(idx,-1); });
+  btns[1].addEventListener("click", function(){ bumpEgg(idx, 1); });
+
+  r.querySelector(".del").addEventListener("click", function(){
+    S.eggs.splice(idx, 1);
+    renderAll();
+  });
+
+  return r;
+}
+
+function renderEggs(host){
+  var total = eggCards();
+
+  var box = document.createElement("div");
+  box.className = "eggblock";
+
+  var h = document.createElement("div");
+  h.className = "grp-head";
+  h.innerHTML = '<i class="sw" style="background:' + gcol(EGG_GROUP) + '"></i>'
+    + '<span class="nm"></span><span class="cap"></span><span class="ct"></span>';
+  h.querySelector(".nm").textContent = EGG_GROUP + " · Digi-Egg";
+  h.querySelector(".cap").textContent = "mazo aparte, no cuenta para las 50";
+  var ct = h.querySelector(".ct");
+  ct.textContent = total + "/" + EGG_MAX;
+  ct.classList.toggle("over", total > EGG_MAX);
+  box.appendChild(h);
+
+  S.eggs.forEach(function(c, i){ box.appendChild(eggRow(c, i)); });
+
+  var abierto = (picker && picker.anchor === EGG_GROUP);
+  var add = document.createElement("button");
+  add.className = "addgrp" + (abierto ? " open" : "");
+  add.textContent = abierto ? "× Cerrar el buscador" : "+ Añadir Digi-Egg";
+  add.disabled = !abierto && total >= EGG_MAX;
+  add.title = add.disabled ? "El mazo de huevos ya tiene " + EGG_MAX + " cartas" : "";
+  add.addEventListener("click", function(){
+    if (!CARD_DB.__n){
+      S.eggs.push({ n:"", g:EGG_GROUP, c:0, dp:0, q:1 });
+      focusEgg = S.eggs.length - 1;
+      renderAll();
+      return;
+    }
+    abrirPicker(EGG_GROUP, EGG_G, true);
+  });
+  box.appendChild(add);
+  if (abierto) box.appendChild(renderPicker());
+
+  host.appendChild(box);
+}
+
 function renderDeck(){
   var N = totalCards(), n = handSize();
   var host = document.getElementById("decklist");
   host.textContent = "";
 
-  GROUPS.forEach(function(g){
+  GROUPS.forEach(function(g, gi){
     var gc = groupCount(g);
     var rows = [];
     S.cards.forEach(function(c, i){ if (c.g === g) rows.push([c, i]); });
@@ -202,27 +302,59 @@ function renderDeck(){
 
     rows.forEach(function(e){ host.appendChild(cardRow(e[0], e[1], N, n)); });
 
+    var abierto = (picker && picker.anchor === g);
     var add = document.createElement("button");
-    add.className = "addgrp";
-    add.textContent = "+ A\u00f1adir carta a " + g;
+    add.className = "addgrp" + (abierto ? " open" : "");
+    add.textContent = (abierto ? "\u00d7 Cerrar el buscador" : "+ A\u00f1adir carta a " + g);
     add.addEventListener("click", function(){
-      S.cards.push({ n:"", g:g, c:0, dp:0, q:1 });
-      focusIdx = S.cards.length - 1;
-      renderAll();
+      // Sin cat\u00e1logo compilado no hay nada que buscar: fila en blanco y a mano.
+      if (!CARD_DB.__n){
+        S.cards.push({ n:"", g:g, c:0, dp:0, q:1 });
+        focusIdx = S.cards.length - 1;
+        renderAll();
+        return;
+      }
+      abrirPicker(g, gi, false);
     });
     host.appendChild(add);
+    if (abierto) host.appendChild(renderPicker());
   });
+
+  renderEggs(host);
 
   if (focusIdx !== null){
     var el = host.querySelector('input.nm[data-i="' + focusIdx + '"]');
     if (el){ el.focus(); }
     focusIdx = null;
   }
+  if (focusEgg !== null){
+    var ee = host.querySelector('input.nm[data-e="' + focusEgg + '"]');
+    if (ee){ ee.focus(); }
+    focusEgg = null;
+  }
+  // Añadir una carta rehace toda la lista, así que hay que devolver el cursor
+  // al buscador para poder seguir añadiendo sin volver a pinchar.
+  if (picker){
+    var pq = host.querySelector(".pk-q");
+    if (pq){ pq.focus(); pq.setSelectionRange(pq.value.length, pq.value.length); }
+  }
 }
 
 function bump(idx, d){
   var c = S.cards[idx];
-  c.q = Math.max(0, Math.min(4, c.q + d));
+  c.q = Math.max(0, Math.min(COPY_MAX, c.q + d));
+  renderAll();
+}
+
+function bumpEgg(idx, d){
+  var c = S.eggs[idx];
+  var q = Math.max(0, Math.min(COPY_MAX, c.q + d));
+  // Además del tope por carta, el mazo de huevos no puede pasar de 5.
+  if (d > 0){
+    var sinEsta = eggCards() - c.q;
+    q = Math.min(q, Math.max(0, EGG_MAX - sinEsta));
+  }
+  c.q = q;
   renderAll();
 }
 
@@ -771,15 +903,233 @@ document.getElementById("sim-reset").addEventListener("click", function(){
    catálogo—, así que un nombre mal escrito o partido en dos líneas no rompe
    nada. Sin catálogo el importador se apaga en vez de adivinar. */
 
-var OUT_OF_DECK = GROUPS.length;   // huevos y cartas sin nivel: no van en las 50
+/* Índices de grupo que usa el catálogo compilado. Los tres primeros valores los
+   fija build.mjs / dev/compilar.ps1: si cambian allí, cambian aquí. */
+var EGG_G       = GROUPS.length;       // 7 · Lv.2, va al mazo de huevos
+var OUT_OF_DECK = GROUPS.length + 1;   // 8 · ni en las 50 ni en los huevos
 
+var CARD_ROWS = [];   // el catálogo entero, en orden, para el selector
 var CARD_DB = (function(){
   var by = {}, el = document.getElementById("card-db"), rows = [];
   try { rows = JSON.parse(el.textContent) || []; } catch(e){ rows = []; }
   for (var i = 0; i < rows.length; i++) by[rows[i][0].toUpperCase()] = rows[i];
   by.__n = rows.length;
+  CARD_ROWS = rows;
   return by;
 })();
+
+/* ---------------- selector de cartas ---------------- */
+/* El catálogo entero ya viaja dentro de la página, así que añadir una carta no
+   tiene por qué ser escribir el nombre a mano: se busca por nombre o por ID, y
+   se puede acotar a una expansión.
+
+   La expansión sale del propio ID —BT24-101 es de BT24— porque así están
+   numeradas las cartas. Los 66 prefijos distintos del catálogo son exactamente
+   las 66 expansiones, de modo que esto no cuesta ni un byte de datos extra. */
+var SET_FAMILIES = { BT:"Booster", EX:"Extra Booster", ST:"Starter Deck",
+                     AD:"Advanced Booster", RB:"Reboot Booster", LM:"Limited",
+                     P:"Promo" };
+var SET_ORDER = ["BT","EX","ST","AD","RB","LM","P"];
+
+function setCode(id){
+  var m = String(id).match(/^([A-Z]{1,3}\d{0,2})-/);
+  return m ? m[1] : "";
+}
+function setLabel(code){
+  var fam = code.match(/^([A-Z]+)/);
+  var nombre = fam ? SET_FAMILIES[fam[1]] : null;
+  return nombre ? code + " · " + nombre : code;
+}
+function setSortKey(code){
+  var m = code.match(/^([A-Z]+)(\d*)$/);
+  var fam = m ? m[1] : code;
+  var num = (m && m[2]) ? parseInt(m[2], 10) : 0;
+  var fi = SET_ORDER.indexOf(fam);
+  return (fi < 0 ? 99 : fi) * 1000 + num;
+}
+
+// El código de expansión de cada fila, calculado una sola vez: filtrar 4412
+// cartas en cada tecla no es momento de andar lanzando expresiones regulares.
+var CARD_SETC = CARD_ROWS.map(function(r){ return setCode(r[0]); });
+
+var SET_LIST = (function(){
+  var vistos = {}, out = [];
+  for (var i = 0; i < CARD_SETC.length; i++){
+    var c = CARD_SETC[i];
+    if (c && !vistos[c]){ vistos[c] = true; out.push(c); }
+  }
+  out.sort(function(a,b){ return setSortKey(a) - setSortKey(b); });
+  return out;
+})();
+
+/* Estado del selector abierto. Vive fuera del DOM porque renderDeck() rehace la
+   lista entera en cada cambio, y el panel tiene que sobrevivir a eso: si no,
+   añadir una carta cerraría el selector y habría que reabrirlo para la siguiente. */
+var picker = null;   // { anchor, gIndex, isEgg, q, set, msg }
+var PICK_MAX = 60;   // filas pintadas; el resto se cuenta pero no se dibuja
+
+function abrirPicker(anchor, gIndex, isEgg){
+  // Volver a pulsar el mismo botón lo cierra.
+  if (picker && picker.anchor === anchor){ picker = null; }
+  else picker = { anchor:anchor, gIndex:gIndex, isEgg:isEgg, q:"", set:"", msg:"" };
+  renderAll();
+}
+
+function pickerFiltrar(){
+  var q = picker.q.trim().toUpperCase();
+  var res = [], total = 0;
+  for (var i = 0; i < CARD_ROWS.length; i++){
+    var r = CARD_ROWS[i];
+    if (picker.gIndex !== null && r[2] !== picker.gIndex) continue;
+    if (picker.set && CARD_SETC[i] !== picker.set) continue;
+    if (q && r[1].toUpperCase().indexOf(q) < 0 && r[0].indexOf(q) < 0) continue;
+    total++;
+    if (res.length < PICK_MAX) res.push(r);
+  }
+  return { filas: res, total: total };
+}
+
+// Añade del catálogo. Si la carta ya está, sube una copia en vez de duplicar la
+// fila. Devuelve un aviso cuando no se puede, o null si entró.
+function addFromCatalog(rec){
+  var esHuevo = (rec[2] === EGG_G);
+  var arr = esHuevo ? S.eggs : S.cards;
+
+  if (esHuevo && eggCards() >= EGG_MAX){
+    return "El mazo de huevos ya tiene " + EGG_MAX + " cartas.";
+  }
+  for (var i = 0; i < arr.length; i++){
+    if (arr[i].id === rec[0]){
+      if (arr[i].q >= COPY_MAX) return "Ya hay " + COPY_MAX + " copias de " + rec[1] + ".";
+      arr[i].q++;
+      return null;
+    }
+  }
+  arr.push({ n:rec[1], g: esHuevo ? EGG_GROUP : GROUPS[rec[2]],
+             c:rec[3], dp:rec[4], q:1, id:rec[0] });
+  return null;
+}
+
+function renderPickerLista(host){
+  var r = pickerFiltrar();
+  host.textContent = "";
+
+  if (!r.total){
+    var v = document.createElement("div");
+    v.className = "pk-empty";
+    v.textContent = "Ninguna carta coincide.";
+    host.appendChild(v);
+    return r;
+  }
+
+  r.filas.forEach(function(rec){
+    var esHuevo = (rec[2] === EGG_G);
+    var b = document.createElement("button");
+    b.className = "pk-row";
+    b.innerHTML =
+      '<span class="thumb ' + artClass({ id:rec[0] }) + '"></span>'
+    + '<span class="pk-info"><span class="pk-nm"></span>'
+    +   '<span class="pk-meta"><span class="pk-g"></span><span class="cid"></span></span></span>'
+    + '<span class="pk-add">+</span>';
+    b.querySelector(".pk-nm").textContent = rec[1];
+    b.querySelector(".cid").textContent = rec[0];
+
+    var g = esHuevo ? EGG_GROUP : (GROUPS[rec[2]] || "—");
+    var bits = [g];
+    if (rec[3]) bits.push("coste " + rec[3]);
+    if (rec[4]) bits.push(rec[4].toLocaleString("es") + " DP");
+    b.querySelector(".pk-g").textContent = bits.join(" · ");
+
+    b.addEventListener("click", function(){
+      picker.msg = addFromCatalog(rec) || "";
+      renderAll();
+    });
+    host.appendChild(b);
+  });
+
+  if (r.total > r.filas.length){
+    var mas = document.createElement("div");
+    mas.className = "pk-empty";
+    mas.textContent = "…y " + (r.total - r.filas.length) + " más. Afina la búsqueda.";
+    host.appendChild(mas);
+  }
+  return r;
+}
+
+function renderPicker(){
+  var box = document.createElement("div");
+  box.className = "picker";
+
+  var head = document.createElement("div");
+  head.className = "pk-head";
+  head.innerHTML =
+    '<input class="pk-q" type="search" placeholder="Nombre o ID de la carta…" aria-label="Buscar carta por nombre o ID">'
+  + '<select class="pk-set" aria-label="Expansión"></select>'
+  + '<button class="pk-x" title="Cerrar" aria-label="Cerrar el selector">×</button>';
+  box.appendChild(head);
+
+  var sel = head.querySelector(".pk-set");
+  var op0 = document.createElement("option");
+  op0.value = ""; op0.textContent = "Todas las expansiones";
+  sel.appendChild(op0);
+  SET_LIST.forEach(function(c){
+    var o = document.createElement("option");
+    o.value = c; o.textContent = setLabel(c);
+    sel.appendChild(o);
+  });
+  sel.value = picker.set;
+
+  var lista = document.createElement("div");
+  lista.className = "pk-list";
+  box.appendChild(lista);
+
+  var foot = document.createElement("div");
+  foot.className = "pk-foot";
+  foot.innerHTML = '<span class="pk-count"></span>'
+    + '<button class="btn ghost tiny pk-blank">Añadir carta en blanco</button>';
+  box.appendChild(foot);
+
+  var q = head.querySelector(".pk-q");
+  var cuenta = foot.querySelector(".pk-count");
+
+  function repintar(){
+    var r = renderPickerLista(lista);
+    var txt = r.total + (r.total === 1 ? " carta" : " cartas");
+    cuenta.textContent = picker.msg ? picker.msg : txt;
+    cuenta.classList.toggle("warn", !!picker.msg);
+  }
+
+  q.value = picker.q;
+  q.addEventListener("input", function(){
+    picker.q = this.value; picker.msg = "";
+    repintar();
+  });
+  q.addEventListener("keydown", function(e){
+    if (e.key === "Escape"){ picker = null; renderAll(); }
+  });
+  sel.addEventListener("change", function(){
+    picker.set = this.value; picker.msg = "";
+    repintar();
+  });
+  head.querySelector(".pk-x").addEventListener("click", function(){
+    picker = null; renderAll();
+  });
+  foot.querySelector(".pk-blank").addEventListener("click", function(){
+    if (picker.isEgg){
+      if (eggCards() >= EGG_MAX){ picker.msg = "El mazo de huevos ya tiene " + EGG_MAX + " cartas."; repintar(); return; }
+      S.eggs.push({ n:"", g:EGG_GROUP, c:0, dp:0, q:1 });
+      focusEgg = S.eggs.length - 1;
+    } else {
+      S.cards.push({ n:"", g:GROUPS[picker.gIndex], c:0, dp:0, q:1 });
+      focusIdx = S.cards.length - 1;
+    }
+    picker = null;
+    renderAll();
+  });
+
+  repintar();
+  return box;
+}
 
 // Los IDs van de "P-194" a "BT24-101": una o dos letras, hasta dos dígitos de
 // set, guion y el número de carta.
@@ -824,10 +1174,10 @@ function parseList(text){
   return { entries: out, issues: issues };
 }
 
-// Convierte lo parseado en cartas del mazo. Junta las repetidas por ID y deja
-// fuera lo que no puede entrar en las 50, diciendo siempre por qué.
+// Convierte lo parseado en cartas del mazo. Junta las repetidas por ID, aparta
+// los Digi-Egg en su propio mazo y deja fuera el resto, diciendo siempre por qué.
 function resolveList(parsed){
-  var cards = [], byId = {}, issues = parsed.issues.slice();
+  var cards = [], eggs = [], byId = {}, issues = parsed.issues.slice();
 
   parsed.entries.forEach(function(e){
     var rec = CARD_DB[e.id.toUpperCase()];
@@ -836,44 +1186,70 @@ function resolveList(parsed){
       return;
     }
     if (rec[2] === OUT_OF_DECK){
-      issues.push({ kind:"warn", ln:e.ln, line:e.line, why:"huevo o carta sin nivel: fuera del mazo de 50" });
+      issues.push({ kind:"warn", ln:e.ln, line:e.line, why:"carta sin nivel: fuera del mazo" });
       return;
     }
     var prev = byId[rec[0]];
     if (prev){ prev.q += e.q; return; }
-    var c = { n:rec[1], g:GROUPS[rec[2]], c:rec[3], dp:rec[4], q:e.q, id:rec[0], ln:e.ln };
+    var esHuevo = (rec[2] === EGG_G);
+    var c = { n:rec[1], g:esHuevo ? EGG_GROUP : GROUPS[rec[2]], c:rec[3], dp:rec[4],
+              q:e.q, id:rec[0], ln:e.ln };
     byId[rec[0]] = c;
-    cards.push(c);
+    (esHuevo ? eggs : cards).push(c);
   });
 
-  cards.forEach(function(c){
-    if (c.q > 4){
-      issues.push({ kind:"warn", ln:c.ln, line:c.q + " " + c.n + " " + c.id, why:"más de 4 copias, se recorta a 4" });
-      c.q = 4;
+  function capCopias(c){
+    if (c.q > COPY_MAX){
+      issues.push({ kind:"warn", ln:c.ln, line:c.q + " " + c.n + " " + c.id,
+                    why:"más de " + COPY_MAX + " copias, se recorta a " + COPY_MAX });
+      c.q = COPY_MAX;
     }
-    delete c.ln;
+  }
+  cards.forEach(capCopias);
+  eggs.forEach(capCopias);
+
+  // El mazo de huevos tiene además un tope propio de 5 cartas en total. Se
+  // recorta por el final para no descartar en silencio lo que puso primero.
+  var acum = 0;
+  eggs.forEach(function(c){
+    var sitio = Math.max(0, EGG_MAX - acum);
+    if (c.q > sitio){
+      issues.push({ kind:"warn", ln:c.ln, line:c.q + " " + c.n + " " + c.id,
+                    why:"el mazo de huevos no pasa de " + EGG_MAX + " cartas, se recorta a " + sitio });
+      c.q = sitio;
+    }
+    acum += c.q;
   });
 
   issues.sort(function(a,b){ return (a.ln || 0) - (b.ln || 0); });
+  cards.forEach(function(c){ delete c.ln; });
+  eggs.forEach(function(c){ delete c.ln; });
   cards.sort(function(a,b){
     var d = GROUPS.indexOf(a.g) - GROUPS.indexOf(b.g);
     return d !== 0 ? d : a.id.localeCompare(b.id);
   });
-  return { cards: cards, issues: issues };
+  eggs.sort(function(a,b){ return a.id.localeCompare(b.id); });
+  return { cards: cards, eggs: eggs, issues: issues };
 }
 
-// El mazo actual, en el mismo formato que se pega arriba.
+// El mazo actual, en el mismo formato que se pega arriba. Los huevos van al
+// final, en su propio bloque, como en las listas del juego.
 function deckToList(){
   var w = 0;
-  S.cards.forEach(function(c){ if (c.q && c.n.length > w) w = c.n.length; });
-  var lines = ["// Digimon DeckList", ""];
-  S.cards.slice().sort(function(a,b){
-    return (a.id || "zz").localeCompare(b.id || "zz");
-  }).forEach(function(c){
-    if (!c.q) return;
-    var name = c.n + new Array(Math.max(1, w - c.n.length + 2)).join(" ");
-    lines.push(c.q + " " + name + " " + (c.id || "?"));
-  });
+  S.cards.concat(S.eggs).forEach(function(c){ if (c.q && c.n.length > w) w = c.n.length; });
+
+  function bloque(arr){
+    return arr.slice().sort(function(a,b){
+      return (a.id || "zz").localeCompare(b.id || "zz");
+    }).filter(function(c){ return c.q; }).map(function(c){
+      var name = c.n + new Array(Math.max(1, w - c.n.length + 2)).join(" ");
+      return c.q + " " + name + " " + (c.id || "?");
+    });
+  }
+
+  var lines = ["// Digimon DeckList", ""].concat(bloque(S.cards));
+  var huevos = bloque(S.eggs);
+  if (huevos.length) lines = lines.concat(["", "// Digi-Egg"], huevos);
   return lines.join("\n");
 }
 
@@ -889,12 +1265,15 @@ function renderReport(res, loaded){
 
   var total = 0, kinds = {};
   res.cards.forEach(function(c){ total += c.q; kinds[c.g] = (kinds[c.g]||0) + c.q; });
+  var totalEggs = 0;
+  res.eggs.forEach(function(c){ totalEggs += c.q; });
 
   var tally = document.createElement("div");
   tally.className = "imp-tally";
   var bits = ["<b>" + res.cards.length + "</b> cartas distintas",
               "<b>" + total + "</b> copias"];
   GROUPS.forEach(function(g){ if (kinds[g]) bits.push(g + " <b>" + kinds[g] + "</b>"); });
+  if (totalEggs) bits.push("Digi-Egg <b>" + totalEggs + "</b>");
   tally.innerHTML = bits.join(" <span style='color:var(--line-strong)'>·</span> ");
   impReport.appendChild(tally);
 
@@ -919,6 +1298,15 @@ function renderReport(res, loaded){
       + "</b> copias, no 50. Ajusta la lista o las copias en el editor.</span>";
     impReport.appendChild(w);
   }
+
+  // El mazo de huevos se cuenta aparte: 5 es el tope, pero 0 también es legal.
+  if (loaded && totalEggs > EGG_MAX){
+    var we = document.createElement("div");
+    we.className = "imp-tally";
+    we.innerHTML = "<span style='color:var(--crit)'>El mazo de huevos tiene <b>" + totalEggs
+      + "</b> cartas, más de " + EGG_MAX + ".</span>";
+    impReport.appendChild(we);
+  }
 }
 
 document.getElementById("imp-load").addEventListener("click", function(){
@@ -930,12 +1318,15 @@ document.getElementById("imp-load").addEventListener("click", function(){
   if (!text.trim()){ impSay("Pega una lista primero."); renderReport(null); return; }
 
   var res = resolveList(parseList(text));
-  if (!res.cards.length){
+  if (!res.cards.length && !res.eggs.length){
     impSay("No se reconoció ninguna carta.");
     renderReport(res, false);
     return;
   }
+  // La lista rehace el mazo entero, huevos incluidos: si no trae ninguno, se
+  // queda sin huevos, que es lo que dice la lista.
   S.cards = res.cards;
+  S.eggs = res.eggs;
   renderAll();
   var bad = res.issues.filter(function(i){ return i.kind === "bad"; }).length;
   impSay("Mazo cargado" + (bad ? " · " + bad + (bad === 1 ? " línea sin cargar" : " líneas sin cargar") : "."));
@@ -1018,11 +1409,20 @@ saveBtn.disabled = true; csvBtn.disabled = true;
         var p1 = pAtLeast(k,1,N,n);
         rows.push([g,"","",k,(p1*100).toFixed(4),((1-Math.pow(1-p1,2))*100).toFixed(4)]);
       });
+      // Los huevos van en su propio bloque y sin probabilidades: no se roban.
+      var eggRows = S.eggs.filter(function(c){ return c.q; });
+      if (eggRows.length){
+        rows.push([]);
+        rows.push(["digi-egg (mazo aparte, no cuenta para las 50)","","","copias","",""]);
+        eggRows.forEach(function(c){
+          rows.push([c.n || "(sin nombre)", EGG_GROUP, "", c.q, "", ""]);
+        });
+      }
       var csv = rows.map(function(r){
         return r.map(function(v){ return '"' + String(v).replace(/"/g,'""') + '"'; }).join(",");
       }).join("\n");
       try {
-        await downloads.save({ filename:"mano-inicial-jupitermon.csv", data:"﻿" + csv });
+        await downloads.save({ filename:"digimon-analytics.csv", data:"﻿" + csv });
       } catch(e){ msg("Descarga cancelada."); }
     });
   } else {
