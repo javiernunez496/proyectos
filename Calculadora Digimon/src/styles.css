@@ -332,6 +332,46 @@ h1 .bolt{color:var(--accent)}
 .dist i{display:block; height:100%; box-shadow:0 0 0 1px var(--surface) inset}
 .dist i + i{margin-left:2px}
 .dist-legend{display:flex; gap:14px; flex-wrap:wrap; padding:12px 18px 2px; font-size:11px; color:var(--muted)}
+
+/* ---------- curva de costes ---------- */
+.curve{display:flex; flex-direction:column; gap:3px}
+.cbar{display:flex; align-items:center; gap:9px}
+.cbar.zero{opacity:.4}
+.cb-k{
+  flex:0 0 auto; width:16px; text-align:right; font-size:11px; color:var(--muted);
+  font-variant-numeric:tabular-nums;
+}
+.cb-track{flex:1 1 auto; height:13px; border-radius:2px; background:var(--track); overflow:hidden}
+.cb-track i{display:block; height:100%; background:var(--accent-fill)}
+.cb-q{
+  flex:0 0 auto; width:20px; font-size:11px; color:var(--ink-2);
+  font-variant-numeric:tabular-nums;
+}
+.afford{display:flex; flex-wrap:wrap; gap:7px}
+.afchip{
+  display:flex; flex-direction:column; gap:1px; padding:6px 9px;
+  border:1px solid var(--line); border-radius:5px; background:var(--surface-2);
+}
+.af-k{font-size:10px; color:var(--muted); letter-spacing:.06em}
+.af-p{font-family:"Chakra Petch",sans-serif; font-size:16px; font-weight:700; color:var(--ink); line-height:1.1}
+.af-n{font-size:10px; color:var(--muted)}
+
+/* ---------- impacto de una copia ---------- */
+.dd{font-family:"IBM Plex Mono",monospace; font-size:10.5px; font-weight:500}
+.dd.up{color:var(--good)}
+.dd.down{color:var(--crit)}
+.gtable tr.best td{background:var(--accent-soft)}
+.gtable tr.best td:first-child{box-shadow:inset 3px 0 0 var(--accent-fill)}
+
+/* ---------- comparar mazos ---------- */
+.cmp-head{display:flex; align-items:center; gap:10px; padding-bottom:14px; flex-wrap:wrap}
+.cmp-nm{
+  flex:1 1 160px; min-width:0; font-family:"IBM Plex Sans",sans-serif; font-size:13px;
+  font-weight:500; color:var(--ink); background:var(--surface-2);
+  border:1px solid var(--line-strong); border-radius:4px; padding:5px 8px;
+}
+.cmp-nm:focus{border-color:var(--accent-fill); outline:none}
+.cmp-when{font-size:10.5px; color:var(--muted)}
 .dist-legend span{display:inline-flex; align-items:center; gap:6px}
 .dist-legend i{width:9px; height:9px; border-radius:2px; display:inline-block}
 

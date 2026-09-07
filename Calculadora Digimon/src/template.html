@@ -152,6 +152,40 @@ placeholder="// Digimon DeckList
     </section>
   </div>
 
+  <!-- ============ COMPOSICIÓN: CURVA E IMPACTO ============ -->
+  <div class="grid" style="margin-top:26px">
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Curva de costes</h2>
+        <div class="eyebrow">Copias por coste de juego</div>
+      </div>
+      <div class="pad">
+        <div class="curve" id="curve"></div>
+        <div class="eyebrow" style="margin:18px 0 9px">Abrir con algo de coste ≤ N</div>
+        <div class="afford" id="afford"></div>
+        <p class="note" style="padding:12px 0 0">Las cartas escritas a mano entran con coste 0 hasta que se lo pongas, así que aparecen en la primera barra. Los Digi-Egg no cuentan: no se pagan ni se roban.</p>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Impacto de una copia</h2>
+        <div class="eyebrow">Dónde rinde el próximo hueco</div>
+      </div>
+      <div class="pad">
+        <div style="overflow-x:auto">
+          <table class="gtable">
+            <thead>
+              <tr><th>Grupo</th><th>Copias</th><th>≥1 en mano</th><th>Con +1</th><th>Con −1</th><th>Línea</th></tr>
+            </thead>
+            <tbody id="marginal"></tbody>
+          </table>
+        </div>
+        <p class="note" style="padding:12px 0 0">El mazo se queda en 50: dar una copia a un grupo es quitársela a otro. La columna <b>Línea</b> supone que sale de un grupo que no está en la línea; si la sacas de otro eslabón, la ganancia real es menor.</p>
+      </div>
+    </section>
+  </div>
+
   <!-- ============ SIMULADOR ============ -->
   <section class="panel" style="margin-top:26px">
     <div class="panel-head">
@@ -263,6 +297,19 @@ placeholder="// Digimon DeckList
     </div>
     <div class="legend" id="legend"></div>
     <div class="tblview" id="tblview" hidden></div>
+  </section>
+
+  <!-- ============ COMPARAR MAZOS ============ -->
+  <section class="panel" style="margin-top:26px">
+    <div class="panel-head">
+      <h2>Comparar mazos</h2>
+      <div style="display:flex; gap:8px; align-items:center">
+        <button class="btn" id="ref-set">Fijar este mazo como referencia</button>
+        <button class="btn ghost tiny" id="ref-load" hidden>Cargar la referencia</button>
+        <button class="btn ghost tiny" id="ref-clear" hidden>Olvidar</button>
+      </div>
+    </div>
+    <div class="pad" id="cmp"></div>
   </section>
 
   <div class="formula">

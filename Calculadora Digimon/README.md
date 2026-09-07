@@ -22,10 +22,13 @@ simulación. El simulador que trae la página existe solo para verlos converger.
 | Lista del mazo | Probabilidad de ver ≥1 y ≥2 copias de cada carta en la mano inicial |
 | Resumen por grupo | Lo mismo por nivel (Lv.3 … Lv.7, Tamer, Option), con y sin mulligan, y el reparto exacto de 0/1/2/3+ copias |
 | Diagnóstico | Manos sin Lv.3, manos muertas (sin Lv.3 ni Tamer) y ladrillos (5 cartas impagables) |
+| Curva de costes | Copias por coste de juego, y probabilidad de abrir con al menos una carta de coste ≤ N |
+| Impacto de una copia | Cuánto mueven las probabilidades dar o quitar una copia a cada grupo, con el mazo fijo en 50 |
 | Simulador | Reparte mano y seguridad, y acumula la frecuencia observada contra el valor exacto |
 | Línea completa | Probabilidad de abrir con al menos una carta de cada nivel de la línea, por inclusión-exclusión |
 | Seguridad | Qué acaba en las 5 de seguridad, qué sigue en el mazo, y si el muro aguanta a un atacante de X DP |
 | Turno a turno | Probabilidad acumulada según avanzan los robos, distinguiendo si empiezas o no |
+| Comparar mazos | Diferencia entre el mazo cargado y una referencia guardada, métrica a métrica |
 
 ## Las fórmulas
 
@@ -139,6 +142,30 @@ del muro de seguridad para saber qué cartas pueden frenar un ataque. El `id` es
 opcional para el cálculo, pero es lo que distingue dos cartas del mismo nombre
 —este mazo lleva dos Jupitermon, dos Aegiomon y dos Elecmon distintos— y sale
 impreso junto al coste en cada fila.
+
+### Impacto de una copia, y qué supone
+
+Es la tabla que dice **dónde poner el próximo hueco**. Para cada grupo calcula
+qué pasa con una copia más y con una menos, **manteniendo el mazo en 50**: dar
+una copia a un grupo es quitársela a otro, que es como se ajusta un mazo de
+verdad. Por eso no se calcula por carta: el efecto sobre el grupo depende solo
+del total del grupo, y el de la carta suelta ya sale en la lista del mazo.
+
+La columna **Línea** es la interesante, porque es la métrica compuesta: mide
+cuánto sube la probabilidad de abrir con la línea completa. Supone que la copia
+sale de un grupo que *no* está en la línea; si la sacas de otro eslabón, la
+ganancia real es menor. La fila destacada es la que más rinde.
+
+### Comparar mazos
+
+Guarda una foto de las métricas del mazo actual, y a partir de ahí toda la tabla
+muestra la diferencia contra él. La referencia se queda en `localStorage`, así
+que sobrevive a recargar la página, y se puede volver a ella con «Cargar la
+referencia», que vuelca su lista en el importador.
+
+Los colores leen la dirección de cada métrica: subir «≥1 Lv.3 en mano» es bueno
+y sale en verde, subir «Mano sin Lv.3» es malo y sale en rojo. Las cuentas
+(cartas, Digi-Egg) no se colorean, porque no son ni mejores ni peores.
 
 ### Buscador de cartas
 

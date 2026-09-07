@@ -416,6 +416,258 @@ function renderTiles(){
   });
 }
 
+/* ---------------- curva de costes ---------------- */
+/* El coste ya estaba guardado en cada carta y solo se usaba para la casilla de
+   "ladrillo". Aquí sirve para lo de siempre —ver la forma del mazo— y para lo
+   que de verdad decide un turno 1: la probabilidad de abrir con algo pagable. */
+function renderCurve(){
+  var N = totalCards(), n = handSize();
+
+  var porCoste = [], maxC = 0, maxQ = 0;
+  S.cards.forEach(function(c){
+    if (!c.q) return;
+    var k = Math.max(0, Math.min(20, c.c | 0));
+    porCoste[k] = (porCoste[k] || 0) + c.q;
+    if (k > maxC) maxC = k;
+    if (porCoste[k] > maxQ) maxQ = porCoste[k];
+  });
+
+  var host = document.getElementById("curve");
+  host.textContent = "";
+  if (!maxQ){
+    host.innerHTML = '<div class="pk-empty">El mazo está vacío.</div>';
+    document.getElementById("afford").textContent = "";
+    return;
+  }
+
+  for (var k = 0; k <= maxC; k++){
+    var q = porCoste[k] || 0;
+    var fila = document.createElement("div");
+    fila.className = "cbar" + (q ? "" : " zero");
+    fila.innerHTML = '<span class="cb-k mono"></span>'
+      + '<span class="cb-track"><i style="width:' + (q / maxQ * 100).toFixed(1) + '%"></i></span>'
+      + '<span class="cb-q mono"></span>';
+    fila.querySelector(".cb-k").textContent = k;
+    fila.querySelector(".cb-q").textContent = q || "";
+    host.appendChild(fila);
+  }
+
+  // Acumulado: cuántas cartas se pueden pagar con N o menos, y con qué
+  // probabilidad aparece al menos una en la mano inicial.
+  var af = document.getElementById("afford");
+  af.textContent = "";
+  var acum = 0;
+  for (var t = 0; t <= Math.min(maxC, 9); t++){
+    acum += (porCoste[t] || 0);
+    if (!acum) continue;               // aún no hay nada tan barato
+    var p = pAtLeast(acum, 1, N, n);
+    var chip = document.createElement("div");
+    chip.className = "afchip";
+    chip.innerHTML = '<span class="af-k mono"></span><span class="af-p mono"></span><span class="af-n"></span>';
+    chip.querySelector(".af-k").textContent = "≤ " + t;
+    chip.querySelector(".af-p").textContent = fmt1(p);
+    chip.querySelector(".af-n").textContent = acum + (acum === 1 ? " carta" : " cartas");
+    af.appendChild(chip);
+    if (p > 0.999) break;              // a partir de aquí ya es siempre que sí
+  }
+}
+
+/* ---------------- impacto de una copia ---------------- */
+/* Lo que la página no decía: qué cambiar. El tamaño del mazo se mantiene en 50,
+   así que esto es el valor de mover un hueco de un grupo a otro. Ojo: por carta
+   no tendría sentido calcularlo, porque el efecto sobre el grupo depende solo
+   del total del grupo, y el efecto sobre la carta suelta ya está en la lista. */
+function fmtPP(d){
+  if (Math.abs(d) < 5e-4) return "0,0 pp";   // por debajo de 0,05 pp ya no se ve
+  var v = (Math.abs(d) * 100).toFixed(1).replace(".", ",");
+  return (d > 0 ? "+" : "−") + v + " pp";
+}
+
+function renderMarginal(){
+  var N = totalCards(), n = handSize();
+  var tb = document.getElementById("marginal");
+  tb.textContent = "";
+  if (N < 2) return;
+
+  var base = lineCounts();
+  var pLinea = base.length ? pAllGroups(base, N, n) : 0;
+
+  var filas = GROUPS.map(function(g){
+    var k = groupCount(g);
+    var p0 = k ? pAtLeast(k, 1, N, n) : 0;
+    var pMas = pAtLeast(k + 1, 1, N, n);
+    var pMenos = k > 0 ? (k - 1 ? pAtLeast(k - 1, 1, N, n) : 0) : 0;
+
+    var dl = 0, i = S.line.indexOf(g);
+    if (i >= 0 && base.length){
+      var c2 = base.slice();
+      c2[i] = c2[i] + 1;
+      dl = pAllGroups(c2, N, n) - pLinea;
+    }
+    return { g:g, k:k, p0:p0, pMas:pMas, pMenos:pMenos, dl:dl };
+  });
+
+  filas.sort(function(a, b){
+    if (b.dl !== a.dl) return b.dl - a.dl;
+    return (b.pMas - b.p0) - (a.pMas - a.p0);
+  });
+
+  filas.forEach(function(f, idx){
+    var tr = document.createElement("tr");
+    if (idx === 0 && (f.dl > 0 || f.pMas > f.p0)) tr.className = "best";
+    tr.innerHTML =
+      '<td><span class="gname"><i class="sw" style="background:' + gcol(f.g) + '"></i><span></span></span></td>'
+    + '<td class="mono">' + f.k + '</td>'
+    + '<td class="big">' + (f.k ? fmt1(f.p0) : "—") + '</td>'
+    + '<td>' + fmt1(f.pMas) + ' <span class="dd up">' + fmtPP(f.pMas - f.p0) + '</span></td>'
+    + '<td>' + (f.k ? fmt1(f.pMenos) + ' <span class="dd down">' + fmtPP(f.pMenos - f.p0) + '</span>' : "—") + '</td>'
+    + '<td>' + (f.dl > 0 ? '<span class="dd up">' + fmtPP(f.dl) + '</span>' : "—") + '</td>';
+    tr.querySelector(".gname span").textContent = f.g;
+    tb.appendChild(tr);
+  });
+}
+
+/* ---------------- comparar mazos ---------------- */
+/* El encabezado promete que dos mazos se pueden comparar sin ruido de muestreo;
+   esto es lo que cumple la promesa. Se guarda una foto de las métricas, no el
+   mazo entero, más la lista para poder volver a él. */
+var REF_KEY = "dcg-ref";
+var refDeck = (function(){
+  try { return JSON.parse(localStorage.getItem(REF_KEY)) || null; } catch(e){ return null; }
+})();
+
+function guardarRef(){
+  try { localStorage.setItem(REF_KEY, JSON.stringify(refDeck)); } catch(e){}
+}
+
+// dir: +1 si subir es mejor, -1 si subir es peor, 0 si es solo una cuenta.
+var CMP_FILAS = [
+  { k:"__N",      lbl:"Cartas en el mazo", dir:0, pct:false },
+  { k:"__eggs",   lbl:"Digi-Egg",          dir:0, pct:false },
+  { k:"linea",    lbl:"Línea completa",    dir:1, pct:true },
+  { k:"sinLv3",   lbl:"Mano sin Lv.3",     dir:-1, pct:true },
+  { k:"muerta",   lbl:"Sin Lv.3 ni Tamer", dir:-1, pct:true },
+  { k:"ladrillo", lbl:"Solo Lv.5/6/7",     dir:-1, pct:true }
+];
+
+function metrics(){
+  var N = totalCards(), n = handSize();
+  var m = { __N:N, __eggs:eggCards() };
+  GROUPS.forEach(function(g){
+    var k = groupCount(g);
+    m["g:" + g] = k ? pAtLeast(k, 1, N, n) : 0;
+  });
+  var counts = lineCounts();
+  m.linea = counts.length ? pAllGroups(counts, N, n) : 0;
+  var lv3 = groupCount("Lv.3"), tam = groupCount("Tamer");
+  var heavy = groupCount("Lv.5") + groupCount("Lv.6") + groupCount("Lv.7");
+  m.sinLv3 = pExact(lv3, 0, N, n);
+  m.muerta = (N - lv3 - tam >= n) ? Math.exp(logC(N - lv3 - tam, n) - logC(N, n)) : 0;
+  m.ladrillo = (heavy >= n) ? Math.exp(logC(heavy, n) - logC(N, n)) : 0;
+  return m;
+}
+
+function renderCompare(){
+  var host = document.getElementById("cmp");
+  host.textContent = "";
+  document.getElementById("ref-clear").hidden = !refDeck;
+  document.getElementById("ref-load").hidden = !refDeck;
+  document.getElementById("ref-set").textContent = refDeck
+    ? "Sustituir la referencia por este mazo" : "Fijar este mazo como referencia";
+
+  if (!refDeck){
+    var v = document.createElement("p");
+    v.className = "note";
+    v.style.padding = "0";
+    v.textContent = "Fija este mazo como referencia, carga otro con el importador o el buscador, "
+      + "y aquí verás qué se gana y qué se pierde. Como todo es combinatoria exacta, la diferencia "
+      + "es la diferencia real entre los dos mazos, no ruido de un muestreo.";
+    host.appendChild(v);
+    return;
+  }
+
+  var cab = document.createElement("div");
+  cab.className = "cmp-head";
+  cab.innerHTML = '<span class="eyebrow">Referencia</span>'
+    + '<input class="cmp-nm" type="text" aria-label="Nombre de la referencia">'
+    + '<span class="cmp-when mono"></span>';
+  var nm = cab.querySelector(".cmp-nm");
+  nm.value = refDeck.nombre || "";
+  nm.placeholder = "Ponle un nombre";
+  nm.addEventListener("input", function(){ refDeck.nombre = this.value; guardarRef(); });
+  cab.querySelector(".cmp-when").textContent = refDeck.cuando || "";
+  host.appendChild(cab);
+
+  var act = metrics(), ref = refDeck.m || {};
+
+  var filas = CMP_FILAS.slice();
+  GROUPS.forEach(function(g){
+    filas.splice(2 + GROUPS.indexOf(g), 0, { k:"g:" + g, lbl:"≥1 " + g + " en mano", dir:1, pct:true, g:g });
+  });
+
+  var wrap = document.createElement("div");
+  wrap.style.overflowX = "auto";
+  var t = document.createElement("table");
+  t.className = "gtable";
+  t.innerHTML = "<thead><tr><th>Métrica</th><th>Referencia</th><th>Este mazo</th><th>Diferencia</th></tr></thead>";
+  var tb = document.createElement("tbody");
+
+  filas.forEach(function(f){
+    var a = ref[f.k], b = act[f.k];
+    if (typeof a !== "number" || typeof b !== "number") return;
+    var d = b - a;
+    var muestra = f.pct ? fmt1 : function(x){ return String(x); };
+    // Mismo umbral para pintar y para redondear: si la diferencia no llega a
+    // verse en el número, tampoco debe salir en color.
+    var eps = f.pct ? 5e-4 : 1e-9;
+    var igual = Math.abs(d) < eps;
+    var cls = (f.dir && !igual) ? (d * f.dir > 0 ? "v-good" : "v-crit") : "";
+
+    var tr = document.createElement("tr");
+    tr.innerHTML = '<td class="cmp-lbl"></td>'
+      + '<td class="mono">' + muestra(a) + '</td>'
+      + '<td class="big">' + muestra(b) + '</td>'
+      + '<td class="' + cls + '">' + (igual ? "=" : (f.pct ? fmtPP(d) : (d > 0 ? "+" : "−") + Math.abs(d))) + '</td>';
+    var lbl = tr.querySelector(".cmp-lbl");
+    if (f.g){
+      lbl.innerHTML = '<span class="gname"><i class="sw" style="background:' + gcol(f.g) + '"></i><span></span></span>';
+      lbl.querySelector(".gname span").textContent = f.lbl;
+    } else {
+      lbl.textContent = f.lbl;
+    }
+    tb.appendChild(tr);
+  });
+
+  t.appendChild(tb);
+  wrap.appendChild(t);
+  host.appendChild(wrap);
+}
+
+document.getElementById("ref-set").addEventListener("click", function(){
+  var d = new Date();
+  refDeck = {
+    nombre: (refDeck && refDeck.nombre) || "",
+    cuando: d.toLocaleDateString("es") + " " + d.toTimeString().slice(0,5),
+    m: metrics(),
+    lista: deckToList()
+  };
+  guardarRef();
+  renderAll();
+});
+document.getElementById("ref-clear").addEventListener("click", function(){
+  refDeck = null;
+  try { localStorage.removeItem(REF_KEY); } catch(e){}
+  renderAll();
+});
+document.getElementById("ref-load").addEventListener("click", function(){
+  if (!refDeck || !refDeck.lista) return;
+  var imp = document.getElementById("importer");
+  if (imp) imp.open = true;
+  document.getElementById("imp-text").value = refDeck.lista;
+  impSay("Lista de la referencia volcada. Pulsa «Cargar lista» para montarla.");
+  document.getElementById("imp-text").scrollIntoView({ block:"center" });
+});
+
 /* ---------------- gráfico por turno ---------------- */
 var TURNS = 10;
 function seenAt(turn){
@@ -1441,6 +1693,9 @@ function renderAll(){
   renderDeck();
   renderGroups();
   renderTiles();
+  renderCurve();
+  renderMarginal();
+  renderCompare();
   renderLine();
   renderSecurity();
   renderSim();
