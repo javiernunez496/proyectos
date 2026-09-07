@@ -59,8 +59,10 @@ mira las `n + s` cartas de arriba a la vez.
 ├── build.mjs           # une src/ + data/ en dist/. Sin dependencias.
 ├── watch.mjs           # reconstruye al guardar
 ├── ver-calculadora.bat # Windows sin Node: compila, sirve y recarga solo
+├── publicar.bat        # compila y deja la copia publicable en docs/
 ├── dev/
 │   ├── compilar.ps1    # build.mjs reescrito en PowerShell
+│   ├── publicar.ps1    # copia dist/index.html a docs/ para GitHub Pages
 │   └── servidor.ps1    # servidor local con recarga automática
 ├── data/
 │   ├── deck.json       # el mazo: nombre, grupo, coste, DP y copias
@@ -119,6 +121,48 @@ Después abre `dist/index.html`.
 > toca el otro. Ojo especialmente con los índices de grupo del catálogo
 > (`Tamer` 5, `Option` 6, Digi-Egg 7, fuera del mazo 8): los tres archivos
 > —los dos compiladores y `src/app.js`— tienen que estar de acuerdo.
+
+## Publicar
+
+`dist/index.html` ya es una página completa: un archivo, sin dependencias y sin
+nada que compilar en el destino. Cualquier hosting estático lo sirve tal cual.
+
+En este repositorio se publica con **GitHub Pages** desde la carpeta `docs/` de
+la raíz. Ahí va **solo la calculadora**: el otro proyecto del repositorio se
+queda sin publicar.
+
+**Doble clic en `publicar.bat`.** Compila y deja la copia en `docs/index.html`.
+Después, desde la raíz del repositorio:
+
+```bash
+git add docs
+```
+
+```bash
+git commit -m "Publicar Digimon Analytics"
+```
+
+La configuración en GitHub se hace una sola vez, en **Settings → Pages →
+Deploy from a branch → `master` → `/docs`**. La página queda en
+`https://javiernunez496.github.io/proyectos/`.
+
+> **No refresques `docs/` en cada retoque.** Son 1,3 MB que cambian enteros en
+> cada compilación, porque llevan las ilustraciones incrustadas en base64. Un
+> commit por publicación de verdad, no uno por cambio.
+
+### Qué cambia fuera de Claude
+
+La página detecta si tiene el API de Claude disponible y se adapta sola:
+
+| Botón | En un artefacto de Claude | Servida como página normal |
+|---|---|---|
+| Guardar mazo | Publica el mazo en la propia página | Desaparece: no hay dónde guardar |
+| Descargar CSV | Usa el diálogo de descarga de Claude | Descarga normal del navegador |
+
+Las ilustraciones de las cartas del mazo van incrustadas, así que se ven siempre.
+Las de cartas añadidas con el buscador se piden a `images.digimoncard.io`: en una
+página normal se ven, y dentro de un artefacto de Claude las bloquea la CSP y
+queda el marco vacío.
 
 ## Editar el mazo
 

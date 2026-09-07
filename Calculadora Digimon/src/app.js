@@ -1615,6 +1615,39 @@ var saveBtn = document.getElementById("save-btn");
 var csvBtn = document.getElementById("csv-btn");
 saveBtn.disabled = true; csvBtn.disabled = true;
 
+var CSV_NOMBRE = "digimon-analytics.csv";
+
+// Arma el CSV. Separado de la descarga porque el contenido es el mismo dentro
+// y fuera de Claude; lo único que cambia es cómo se le entrega al usuario.
+function csvTexto(){
+  var N = totalCards(), n = handSize();
+  var rows = [["carta","grupo","coste","copias","p_al_menos_1","p_al_menos_2"]];
+  S.cards.forEach(function(c){
+    rows.push([c.n || "(sin nombre)", c.g, c.c, c.q,
+      c.q ? (pAtLeast(c.q,1,N,n)*100).toFixed(4) : "0",
+      c.q >= 2 ? (pAtLeast(c.q,2,N,n)*100).toFixed(4) : "0"]);
+  });
+  rows.push([]);
+  rows.push(["grupo","","","copias","p_al_menos_1","p_con_mulligan"]);
+  GROUPS.forEach(function(g){
+    var k = groupCount(g); if (!k) return;
+    var p1 = pAtLeast(k,1,N,n);
+    rows.push([g,"","",k,(p1*100).toFixed(4),((1-Math.pow(1-p1,2))*100).toFixed(4)]);
+  });
+  // Los huevos van en su propio bloque y sin probabilidades: no se roban.
+  var eggRows = S.eggs.filter(function(c){ return c.q; });
+  if (eggRows.length){
+    rows.push([]);
+    rows.push(["digi-egg (mazo aparte, no cuenta para las 50)","","","copias","",""]);
+    eggRows.forEach(function(c){
+      rows.push([c.n || "(sin nombre)", EGG_GROUP, "", c.q, "", ""]);
+    });
+  }
+  return rows.map(function(r){
+    return r.map(function(v){ return '"' + String(v).replace(/"/g,'""') + '"'; }).join(",");
+  }).join("\n");
+}
+
 (async function(){
   var artifact = null, downloads = null;
   try { artifact = await window.claude.use("artifact"); } catch(e){}
@@ -1644,42 +1677,30 @@ saveBtn.disabled = true; csvBtn.disabled = true;
     saveBtn.remove();
   }
 
-  if (downloads){
-    csvBtn.disabled = false;
-    csvBtn.addEventListener("click", async function(){
-      var N = totalCards(), n = handSize();
-      var rows = [["carta","grupo","coste","copias","p_al_menos_1","p_al_menos_2"]];
-      S.cards.forEach(function(c){
-        rows.push([c.n || "(sin nombre)", c.g, c.c, c.q,
-          c.q ? (pAtLeast(c.q,1,N,n)*100).toFixed(4) : "0",
-          c.q >= 2 ? (pAtLeast(c.q,2,N,n)*100).toFixed(4) : "0"]);
-      });
-      rows.push([]);
-      rows.push(["grupo","","","copias","p_al_menos_1","p_con_mulligan"]);
-      GROUPS.forEach(function(g){
-        var k = groupCount(g); if (!k) return;
-        var p1 = pAtLeast(k,1,N,n);
-        rows.push([g,"","",k,(p1*100).toFixed(4),((1-Math.pow(1-p1,2))*100).toFixed(4)]);
-      });
-      // Los huevos van en su propio bloque y sin probabilidades: no se roban.
-      var eggRows = S.eggs.filter(function(c){ return c.q; });
-      if (eggRows.length){
-        rows.push([]);
-        rows.push(["digi-egg (mazo aparte, no cuenta para las 50)","","","copias","",""]);
-        eggRows.forEach(function(c){
-          rows.push([c.n || "(sin nombre)", EGG_GROUP, "", c.q, "", ""]);
-        });
-      }
-      var csv = rows.map(function(r){
-        return r.map(function(v){ return '"' + String(v).replace(/"/g,'""') + '"'; }).join(",");
-      }).join("\n");
-      try {
-        await downloads.save({ filename:"digimon-analytics.csv", data:"﻿" + csv });
-      } catch(e){ msg("Descarga cancelada."); }
-    });
-  } else {
-    csvBtn.remove();
-  }
+  // El CSV no depende de Claude: se arma igual, y solo cambia por dónde sale.
+  csvBtn.disabled = false;
+  csvBtn.addEventListener("click", async function(){
+    var datos = "﻿" + csvTexto();
+    if (downloads){
+      try { await downloads.save({ filename:CSV_NOMBRE, data:datos }); }
+      catch(e){ msg("Descarga cancelada."); }
+      return;
+    }
+    // Servida como página normal: descarga del navegador de toda la vida.
+    try {
+      var url = URL.createObjectURL(new Blob([datos], { type:"text/csv;charset=utf-8" }));
+      var a = document.createElement("a");
+      a.href = url;
+      a.download = CSV_NOMBRE;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+      msg("CSV descargado.");
+    } catch(e){
+      msg("Este navegador no ha dejado descargar el CSV.");
+    }
+  });
 })();
 
 /* ---------------- ciclo de render ---------------- */
