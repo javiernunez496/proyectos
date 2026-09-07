@@ -1,6 +1,321 @@
 (function(){
 "use strict";
 
+/* ---------------- idioma ---------------- */
+/* La página está escrita en español y el inglés vive en un diccionario. Se hizo
+   así, y no con dos diccionarios simétricos, por dos razones: el código sigue
+   leyéndose en el idioma en que está escrito el proyecto, y una traducción que
+   falte cae en el original en vez de dejar un hueco en blanco.
+
+   T("texto") traduce cadenas sueltas del JavaScript. Los bloques del HTML van
+   marcados con data-i18n: su versión española se guarda al arrancar y se
+   restaura al volver a español. */
+var LANG_KEY = "dcg-lang";
+var lang = (function(){
+  try {
+    var v = localStorage.getItem(LANG_KEY);
+    if (v === "es" || v === "en") return v;
+  } catch(e){}
+  return /^en/i.test(navigator.language || "") ? "en" : "es";
+})();
+
+function T(s, vars){
+  var out = (lang === "en" && EN[s] != null) ? EN[s] : s;
+  if (vars) out = out.replace(/\{(\w+)\}/g, function(m, k){
+    return vars[k] != null ? String(vars[k]) : m;
+  });
+  return out;
+}
+// Locale para números: separadores de miles y decimales cambian con el idioma.
+function loc(){ return lang === "en" ? "en-US" : "es"; }
+function num(n){ return Number(n).toLocaleString(loc()); }
+function dec(s){ return lang === "en" ? s : String(s).replace(".", ","); }
+/* ---------------- diccionario inglés ---------------- */
+/* Solo el inglés: el español es el original y vive en el propio código y en el
+   HTML. Lo que no esté aquí sale en español, que es un fallo visible pero no
+   roto. Las llaves {x} las rellena T(). */
+
+var EN = {
+  // medidor y lista del mazo
+  "Mazo legal": "Legal deck",
+  "Sobra 1 carta": "1 card too many",
+  "Sobran {d} cartas": "{d} cards too many",
+  "Falta 1 carta": "1 card missing",
+  "Faltan {d} cartas": "{d} cards missing",
+  "vacío": "empty",
+  "1 carta": "1 card",
+  "{n} cartas": "{n} cards",
+  "Nombre de la carta": "Card name",
+  "Coste de la carta": "Card cost",
+  "Quitar copia": "Remove a copy",
+  "Añadir copia": "Add a copy",
+  "Eliminar esta carta del mazo": "Remove this card from the deck",
+  "+ Añadir carta a {g}": "+ Add card to {g}",
+  "× Cerrar el buscador": "× Close the search",
+
+  // Digi-Egg
+  "Nombre del Digi-Egg": "Digi-Egg name",
+  "Eliminar este huevo": "Remove this Digi-Egg",
+  "mazo aparte, no cuenta para las 50": "separate deck, does not count toward the 50",
+  "+ Añadir Digi-Egg": "+ Add Digi-Egg",
+  "El mazo de huevos ya tiene {n} cartas": "The egg deck already has {n} cards",
+  "El mazo de huevos ya tiene {n} cartas.": "The egg deck already has {n} cards.",
+
+  // diagnóstico
+  "Mano sin ningún Lv.3": "Hand with no Lv.3",
+  "No puedes subir de crianza a tiempo.": "You cannot raise out of the breeding area in time.",
+  "Sin Lv.3 y sin Tamer": "No Lv.3 and no Tamer",
+  "Mano muerta: nada que hacer en el turno 1.": "Dead hand: nothing to do on turn 1.",
+  "Solo Lv.5 / 6 / 7": "Only Lv.5 / 6 / 7",
+  "Ladrillo: 5 cartas que no puedes pagar.": "Brick: 5 cards you cannot pay for.",
+
+  // curva de costes
+  "El mazo está vacío.": "The deck is empty.",
+
+  // comparar mazos
+  "Cartas en el mazo": "Cards in deck",
+  "Línea completa": "Full line",
+  "Mano sin Lv.3": "Hand with no Lv.3",
+  "Sin Lv.3 ni Tamer": "No Lv.3 or Tamer",
+  "Solo Lv.5/6/7": "Only Lv.5/6/7",
+  "≥1 {g} en mano": "≥1 {g} in hand",
+  "Referencia": "Reference",
+  "Ponle un nombre": "Give it a name",
+  "Este mazo": "This deck",
+  "Métrica": "Metric",
+  "Diferencia": "Difference",
+  "Fijar este mazo como referencia": "Set this deck as the reference",
+  "Sustituir la referencia por este mazo": "Replace the reference with this deck",
+  "Fija este mazo como referencia, carga otro con el importador o el buscador, y aquí verás qué se gana y qué se pierde. Como todo es combinatoria exacta, la diferencia es la diferencia real entre los dos mazos, no ruido de un muestreo.":
+    "Set this deck as the reference, load another one with the importer or the search box, and this is where you will see what you gain and what you lose. Because it is all exact combinatorics, the difference is the real difference between the two decks, not sampling noise.",
+  "Lista de la referencia volcada. Pulsa «Cargar lista» para montarla.":
+    "Reference list dropped in. Press «Load list» to build it.",
+
+  // línea completa
+  "de abrir con {x} en la misma mano de {n}.": "of opening with {x} in the same hand of {n}.",
+  "Elige arriba qué niveles debe traer la línea.": "Choose above which levels the line needs.",
+
+  // gráfico por turno
+  "Turno {t} · {n} cartas vistas": "Turn {t} · {n} cards seen",
+  "Ver tabla": "Show table",
+  "Ocultar tabla": "Hide table",
+
+  // seguridad
+  "Alguna de las {s} lo frena": "One of the {s} stops it",
+  "{w} de {N} cartas del mazo son Digimon con {dp} DP o más.":
+    "{w} of the {N} cards in the deck are Digimon with {dp} DP or more.",
+
+  // simulador
+  "Pulsa <b>Barajar y robar</b> para repartir una mano de este mazo.":
+    "Press <b>Shuffle and draw</b> to deal a hand from this deck.",
+  "Revelar seguridad": "Reveal security",
+  "Ocultar seguridad": "Hide security",
+  "Barajar 1.000 veces": "Shuffle 1,000 times",
+  "· {n} manos": "· {n} hands",
+  "· 1 mano": "· 1 hand",
+  "Con algún Lv.3": "With at least one Lv.3",
+  "Con algún Tamer": "With at least one Tamer",
+  "Con la línea completa": "With the full line",
+  "Mano muerta": "Dead hand",
+  "exacto {p}": "exact {p}",
+
+  // buscador de cartas
+  "Ninguna carta coincide.": "No card matches.",
+  "…y {n} más. Afina la búsqueda.": "…and {n} more. Narrow the search.",
+  "Todas las expansiones": "All sets",
+  "Nombre o ID de la carta…": "Card name or ID…",
+  "Buscar carta por nombre o ID": "Search for a card by name or ID",
+  "Añadir carta en blanco": "Add a blank card",
+  "Cerrar": "Close",
+  "Cerrar el selector": "Close the card picker",
+  "Ya hay {n} copias de {c}.": "There are already {n} copies of {c}.",
+  "Promo": "Promo",
+  "Booster": "Booster",
+  "Extra Booster": "Extra Booster",
+  "Starter Deck": "Starter Deck",
+  "Advanced Booster": "Advanced Booster",
+  "Reboot Booster": "Reboot Booster",
+  "Limited": "Limited",
+
+  // importador
+  "sin ID de carta": "no card ID",
+  "sin número de copias, se asume 1": "no copy count, assuming 1",
+  "no está en el catálogo": "not in the catalogue",
+  "carta sin nivel: fuera del mazo": "card with no level: outside the deck",
+  "más de {n} copias, se recorta a {n}": "more than {n} copies, trimmed to {n}",
+  "el mazo de huevos no pasa de {m} cartas, se recorta a {s}":
+    "the egg deck cannot go past {m} cards, trimmed to {s}",
+  "sin cargar": "not loaded",
+  "aviso": "warning",
+  "{n} cartas distintas": "{n} distinct cards",
+  "{n} copias": "{n} copies",
+  "El mazo tiene <b>{n}</b> copias, no 50. Ajusta la lista o las copias en el editor.":
+    "The deck has <b>{n}</b> copies, not 50. Adjust the list or the copies in the editor.",
+  "El mazo de huevos tiene <b>{n}</b> cartas, más de {m}.":
+    "The egg deck has <b>{n}</b> cards, more than {m}.",
+  "Pega una lista primero.": "Paste a list first.",
+  "No se reconoció ninguna carta.": "No card was recognised.",
+  "Mazo cargado.": "Deck loaded.",
+  "Mazo cargado · 1 línea sin cargar": "Deck loaded · 1 line not loaded",
+  "Mazo cargado · {n} líneas sin cargar": "Deck loaded · {n} lines not loaded",
+  "Lista copiada al portapapeles y volcada aquí arriba.":
+    "List copied to the clipboard and dropped in above.",
+  "Lista volcada aquí arriba; cópiala a mano.": "List dropped in above; copy it by hand.",
+  "Esta copia se compiló sin catálogo, así que no puede resolver los IDs.":
+    "This copy was built without the catalogue, so it cannot resolve IDs.",
+  "Compilado sin catálogo: ejecuta tools/fetch-cards.ps1 y vuelve a construir.":
+    "Built without the catalogue: run tools/fetch-cards.ps1 and build again.",
+
+  // guardar y exportar
+  "(sin nombre)": "(no name)",
+  "Guardando…": "Saving…",
+  "Guardado. Esta versión del mazo es la que verá quien abra la página.":
+    "Saved. This version of the deck is what anyone opening the page will see.",
+  "Alguien guardó antes que tú; la página se recargará con esa versión.":
+    "Someone saved before you; the page will reload with that version.",
+  "Solo lectura: no puedes guardar en esta página.":
+    "Read only: you cannot save on this page.",
+  "No se pudo guardar. Vuelve a intentarlo.": "Could not save. Try again.",
+  "Descarga cancelada.": "Download cancelled.",
+  "CSV descargado.": "CSV downloaded.",
+  "Este navegador no ha dejado descargar el CSV.":
+    "This browser would not let the CSV download."
+};
+
+/* Bloques del HTML, por su data-i18n. El español no está aquí: se captura del
+   propio documento al arrancar. */
+var EN_HTML = {
+  "eyebrow-top": "Digimon Card Game · Deck analysis",
+  "lede": "Measure how a deck behaves before you sit down to play it: what you open with, how well the evolution line holds, what goes to security and how it all shifts turn by turn. <b>Exact hypergeometric</b> maths, not simulation.",
+  "lbl-idioma": "Language",
+  "lbl-tema": "Theme",
+  "th-claro": "Light",
+  "th-oscuro": "Dark",
+  "lbl-cartas-mazo": "Cards in deck",
+  "empty-note": "<b>Start by loading a deck.</b> Paste your list into «Load a list» just below, or build it card by card with the search box in each level of the deck list. Until there are cards, everything else sits at zero: there is nothing to work out yet.",
+  "intro-note": "<b>No number here is tied to one particular deck.</b> Paste your list or build it with the search box, and everything below —opening hand, evolution line, security, turn by turn— is recalculated over those 50 cards. Since it is exact combinatorics and not simulation, two decks can be compared with no sampling noise in the way.",
+  "imp-title": "Load a list",
+  "imp-sub": "Paste the game's standard format and the whole deck is rebuilt",
+  "imp-note": "One line per card: <span class=\"mono\">copies · name · ID</span>. Lines starting with <span class=\"mono\">//</span> are ignored, and a name split across two lines is joined back on its own. Level, cost and DP come from the catalogue, so the name does not matter: the ID rules.",
+  "imp-load": "Load list",
+  "imp-copy": "Copy the current deck",
+  "imp-clear": "Clear",
+  "deck-title": "Deck list",
+  "deck-sub": "≥1 &nbsp;·&nbsp; ≥2 copies in hand",
+  "lbl-mano": "Hand",
+  "mull-no": "No",
+  "mull-si": "Yes",
+  "btn-reset": "Reset",
+  "th-grupos": "<th>Group</th><th>Copies</th><th>≥1 in hand</th><th>With mulligan</th><th>Spread</th>",
+  "dist-legend": "<span><i style=\"background:var(--track)\"></i> 0 copies</span><span><i style=\"background:var(--o1)\"></i> 1</span><span><i style=\"background:var(--o2)\"></i> 2</span><span><i style=\"background:var(--o3)\"></i> 3+</span>",
+  "curve-title": "Cost curve",
+  "curve-sub": "Copies by play cost",
+  "curve-afford": "Opening with something costing ≤ N",
+  "curve-note": "Cards typed by hand come in at cost 0 until you set it, so they show up in the first bar. Digi-Eggs do not count: they are neither paid for nor drawn.",
+  "marg-title": "Impact of one copy",
+  "marg-sub": "Where the next slot pays off",
+  "th-marg": "<th>Group</th><th>Copies</th><th>≥1 in hand</th><th>With +1</th><th>With −1</th><th>Line</th>",
+  "marg-note": "The deck stays at 50: giving a copy to one group means taking it from another. The <b>Line</b> column assumes it comes from a group outside the line; if you take it from another link, the real gain is smaller.",
+  "sim-title": "Hand simulator",
+  "sim-draw": "Shuffle and draw",
+  "lbl-mano2": "Hand",
+  "lbl-seguridad": "Security",
+  "lbl-frecuencia": "Observed frequency",
+  "sim-reset": "Reset count",
+  "line-title": "Full line in hand",
+  "line-need": "The line needs at least one of each",
+  "line-mull-lbl": "With mulligan",
+  "line-turns": "Cumulative probability by turn",
+  "line-casc": "What each link costs you, in the opening hand",
+  "sec-title": "What goes to security",
+  "lbl-cartas": "Cards",
+  "sec-note": "<b>Dealing security does not change your opening hand.</b> The 5 come off the same shuffled deck, so your hand is still 5 random cards out of the 50: it makes no difference whether you deal security before or after. They are not wasted either — Tamers and Options with a security effect go off down there, and a Digimon stops an attack if its DP holds.",
+  "th-sec": "<th>Group</th><th>≥1 in security</th><th>Expected</th><th>Still in deck</th>",
+  "wall-title": "Security wall",
+  "lbl-atacante": "Attacker",
+  "wall-1": "The top check stops it",
+  "chart-title": "Probability of having seen it, turn by turn",
+  "go-1": "Going 1st",
+  "go-2": "Going 2nd",
+  "cmp-title": "Compare decks",
+  "ref-load": "Load the reference",
+  "ref-clear": "Forget",
+  "f-title": "How it is worked out",
+  "f-p1": "It is easier to count the hands that do <em>not</em> hold the card and subtract. With <span class=\"mono\">k</span> copies in a deck of <span class=\"mono\">N</span> cards and a hand of <span class=\"mono\">n</span>:",
+  "f-p2": "With 4 copies of a card in 50: out of the <span class=\"mono\">C(50,5) = 2,118,760</span> possible hands, <span class=\"mono\">C(46,5) = 1,370,754</span> hold none. That leaves <span class=\"mono\">35.30 %</span> for at least one to turn up.",
+  "f-p3": "The <b>with mulligan</b> column assumes you reshuffle whenever that group fails to turn up, and works out to <span class=\"mono\">1 − (1 − p)²</span>. The turn-by-turn chart uses the same formula with a larger <span class=\"mono\">n</span>: you draw 1 card per turn, and the player going first skips their first draw.",
+  "btn-save": "Save deck",
+  "btn-csv": "Download CSV"
+};
+
+// Atributos, por su data-i18n-aria.
+var EN_ARIA = {
+  "aria-idioma": "Page language",
+  "aria-tema": "Page theme",
+  "aria-lista": "Deck list as text",
+  "aria-mano-menos": "Reduce hand size",
+  "aria-mano-mas": "Increase hand size",
+  "aria-mulligan": "Consider mulligan",
+  "aria-sec-menos": "Fewer security cards",
+  "aria-sec-mas": "More security cards",
+  "aria-dp-menos": "Less DP",
+  "aria-dp-mas": "More DP",
+  "aria-orden": "Play order",
+  "aria-chart": "Cumulative probability of seeing at least one card from each group, by turn"
+};
+
+/* El español del HTML, tal y como venía. Se captura antes de tocar nada, así
+   que volver a español es restaurar exactamente lo que escribió el template. */
+var ES_HTML = {}, ES_ARIA = {};
+(function(){
+  var els = document.querySelectorAll("[data-i18n]");
+  for (var i = 0; i < els.length; i++) ES_HTML[els[i].getAttribute("data-i18n")] = els[i].innerHTML;
+  var as = document.querySelectorAll("[data-i18n-aria]");
+  for (var j = 0; j < as.length; j++) ES_ARIA[as[j].getAttribute("data-i18n-aria")] = as[j].getAttribute("aria-label");
+})();
+
+function applyLang(){
+  document.documentElement.setAttribute("lang", lang === "en" ? "en" : "es");
+
+  var els = document.querySelectorAll("[data-i18n]");
+  for (var i = 0; i < els.length; i++){
+    var k = els[i].getAttribute("data-i18n");
+    var v = (lang === "en" && EN_HTML[k] != null) ? EN_HTML[k] : ES_HTML[k];
+    if (v != null) els[i].innerHTML = v;
+  }
+  var as = document.querySelectorAll("[data-i18n-aria]");
+  for (var j = 0; j < as.length; j++){
+    var ka = as[j].getAttribute("data-i18n-aria");
+    var va = (lang === "en" && EN_ARIA[ka] != null) ? EN_ARIA[ka] : ES_ARIA[ka];
+    if (va != null) as[j].setAttribute("aria-label", va);
+  }
+
+  // Los que no son estáticos: su texto lo decide el estado, no el template.
+  // El separador de miles va dentro de la cadena: cada idioma escribe el suyo.
+  document.getElementById("sim1k").textContent = T("Barajar 1.000 veces");
+  document.getElementById("reveal-btn").textContent =
+    sim.reveal ? T("Ocultar seguridad") : T("Revelar seguridad");
+  document.getElementById("tbl-toggle").textContent =
+    showTable ? T("Ocultar tabla") : T("Ver tabla");
+
+  setPressed("lang-es", lang === "es");
+  setPressed("lang-en", lang === "en");
+}
+
+function setLang(l){
+  if (lang === l) return;
+  lang = (l === "en") ? "en" : "es";
+  try { localStorage.setItem(LANG_KEY, lang); } catch(e){}
+  // Los avisos sueltos son de una acción ya pasada y no se vuelven a pintar:
+  // dejarlos ahí en el idioma anterior se lee como un fallo. Mejor limpiarlos.
+  impSay("");
+  msg("");
+  applyLang();
+  renderAll();
+}
+document.getElementById("lang-es").addEventListener("click", function(){ setLang("es"); });
+document.getElementById("lang-en").addEventListener("click", function(){ setLang("en"); });
+
 /* ---------------- estado ---------------- */
 var GROUPS = ["Lv.3","Lv.4","Lv.5","Lv.6","Lv.7","Tamer","Option"];
 var GVAR = {"Lv.3":"--s-lv3","Lv.4":"--s-lv4","Lv.5":"--s-lv5","Lv.6":"--s-lv6",
@@ -70,8 +385,8 @@ function groupCount(g){ var t=0; for (var i=0;i<S.cards.length;i++) if (S.cards[
 function handSize(){ var N = totalCards(); return N ? Math.min(S.hand, N) : S.hand; }
 function eggCards(){ var t=0; for (var i=0;i<S.eggs.length;i++) t += S.eggs[i].q; return t; }
 
-function fmt(p){ return (p*100).toFixed(2).replace(".", ",") + " %"; }
-function fmt1(p){ return (p*100).toFixed(1).replace(".", ",") + " %"; }
+function fmt(p){ return dec((p*100).toFixed(2)) + " %"; }
+function fmt1(p){ return dec((p*100).toFixed(1)) + " %"; }
 
 /* ---------------- ilustraciones ---------------- */
 /* Las del mazo vienen incrustadas en el HTML; las de una lista que se cargue
@@ -130,10 +445,10 @@ function renderMeter(){
   var st = document.getElementById("deck-status");
   var ok = (N === 50);
   st.className = "meter-status " + (ok ? "ok" : "bad");
-  var d = Math.abs(50 - N), pl = (d === 1 ? " carta" : " cartas");
-  st.querySelector("span").textContent = ok ? "Mazo legal"
-    : (N > 50 ? "Sobra" + (d === 1 ? "" : "n") + " " + d + pl
-              : "Falta" + (d === 1 ? "" : "n") + " " + d + pl);
+  var d = Math.abs(50 - N);
+  st.querySelector("span").textContent = ok ? T("Mazo legal")
+    : (N > 50 ? (d === 1 ? T("Sobra 1 carta") : T("Sobran {d} cartas", { d:d }))
+              : (d === 1 ? T("Falta 1 carta") : T("Faltan {d} cartas", { d:d })));
 
   var e = eggCards();
   document.getElementById("egg-n").textContent = e;
@@ -153,9 +468,9 @@ function cardRow(c, idx, N, n){
   r.innerHTML =
     '<div class="thumb ' + artClass(c) + '"></div>'
   + '<div class="info">'
-  +   '<input class="nm" type="text" placeholder="Nombre de la carta" aria-label="Nombre de la carta">'
-  +   '<div class="meta"><span class="g"></span><span>· coste</span>'
-  +     '<input class="cost" type="number" min="0" max="20" step="1" aria-label="Coste de la carta">'
+  +   '<input class="nm" type="text" placeholder="' + T("Nombre de la carta") + '" aria-label="' + T("Nombre de la carta") + '">'
+  +   '<div class="meta"><span class="g"></span><span>· ' + T("coste") + '</span>'
+  +     '<input class="cost" type="number" min="0" max="20" step="1" aria-label="' + T("Coste de la carta") + '">'
   +     '<span class="dp"></span><span class="cid"></span></div>'
   + '</div>'
   + '<div class="step">'
@@ -163,7 +478,7 @@ function cardRow(c, idx, N, n){
   +   '<div class="q mono">' + c.q + '</div>'
   +   '<button aria-label="Anadir copia">+</button>'
   + '</div>'
-  + '<button class="del" title="Eliminar esta carta del mazo" aria-label="Eliminar esta carta del mazo">\u00d7</button>'
+  + '<button class="del" title="' + T("Eliminar esta carta del mazo") + '" aria-label="' + T("Eliminar esta carta del mazo") + '">\u00d7</button>'
   + '<div class="pcell">'
   +   '<div class="pbar"><i style="width:' + (p1*100).toFixed(1) + '%"></i></div>'
   +   '<div class="pnum">' + (c.q ? fmt1(p1) : "\u2014") + '</div>'
@@ -183,7 +498,7 @@ function cardRow(c, idx, N, n){
   });
 
   r.querySelector(".meta .g").textContent = c.g;
-  r.querySelector(".meta .dp").textContent = c.dp ? "\u00b7 " + c.dp.toLocaleString("es") + " DP" : "";
+  r.querySelector(".meta .dp").textContent = c.dp ? "\u00b7 " + num(c.dp) + " DP" : "";
   // El ID desambigua: en este mazo hay dos Jupitermon, dos Aegiomon y dos Elecmon.
   r.querySelector(".meta .cid").textContent = c.id || "";
 
@@ -212,15 +527,15 @@ function eggRow(c, idx){
   r.innerHTML =
     '<div class="thumb ' + artClass(c) + '"></div>'
   + '<div class="info">'
-  +   '<input class="nm" type="text" placeholder="Nombre del Digi-Egg" aria-label="Nombre del Digi-Egg">'
+  +   '<input class="nm" type="text" placeholder="' + T("Nombre del Digi-Egg") + '" aria-label="' + T("Nombre del Digi-Egg") + '">'
   +   '<div class="meta"><span class="g"></span><span class="cid"></span></div>'
   + '</div>'
   + '<div class="step">'
-  +   '<button aria-label="Quitar copia">−</button>'
+  +   '<button aria-label="' + T("Quitar copia") + '">−</button>'
   +   '<div class="q mono">' + c.q + '</div>'
-  +   '<button aria-label="Anadir copia">+</button>'
+  +   '<button aria-label="' + T("Añadir copia") + '">+</button>'
   + '</div>'
-  + '<button class="del" title="Eliminar este huevo" aria-label="Eliminar este huevo">×</button>';
+  + '<button class="del" title="' + T("Eliminar este huevo") + '" aria-label="' + T("Eliminar este huevo") + '">×</button>';
 
   var nm = r.querySelector("input.nm");
   nm.value = c.n;
@@ -256,7 +571,7 @@ function renderEggs(host){
   h.innerHTML = '<i class="sw" style="background:' + gcol(EGG_GROUP) + '"></i>'
     + '<span class="nm"></span><span class="cap"></span><span class="ct"></span>';
   h.querySelector(".nm").textContent = EGG_GROUP + " · Digi-Egg";
-  h.querySelector(".cap").textContent = "mazo aparte, no cuenta para las 50";
+  h.querySelector(".cap").textContent = T("mazo aparte, no cuenta para las 50");
   var ct = h.querySelector(".ct");
   ct.textContent = total + "/" + EGG_MAX;
   ct.classList.toggle("over", total > EGG_MAX);
@@ -267,9 +582,9 @@ function renderEggs(host){
   var abierto = (picker && picker.anchor === EGG_GROUP);
   var add = document.createElement("button");
   add.className = "addgrp" + (abierto ? " open" : "");
-  add.textContent = abierto ? "× Cerrar el buscador" : "+ Añadir Digi-Egg";
+  add.textContent = abierto ? T("× Cerrar el buscador") : T("+ Añadir Digi-Egg");
   add.disabled = !abierto && total >= EGG_MAX;
-  add.title = add.disabled ? "El mazo de huevos ya tiene " + EGG_MAX + " cartas" : "";
+  add.title = add.disabled ? T("El mazo de huevos ya tiene {n} cartas", { n:EGG_MAX }) : "";
   add.addEventListener("click", function(){
     if (!CARD_DB.__n){
       S.eggs.push({ n:"", g:EGG_GROUP, c:0, dp:0, q:1 });
@@ -301,8 +616,8 @@ function renderDeck(){
       + '<span class="nm"></span><span class="ct"></span>';
     h.querySelector(".nm").textContent = g;
     h.querySelector(".ct").textContent = rows.length
-      ? gc + (gc === 1 ? " carta" : " cartas")
-      : "vac\u00edo";
+      ? (gc === 1 ? T("1 carta") : T("{n} cartas", { n:gc }))
+      : T("vac\u00edo");
     host.appendChild(h);
 
     rows.forEach(function(e){ host.appendChild(cardRow(e[0], e[1], N, n)); });
@@ -310,7 +625,7 @@ function renderDeck(){
     var abierto = (picker && picker.anchor === g);
     var add = document.createElement("button");
     add.className = "addgrp" + (abierto ? " open" : "");
-    add.textContent = (abierto ? "\u00d7 Cerrar el buscador" : "+ A\u00f1adir carta a " + g);
+    add.textContent = (abierto ? T("\u00d7 Cerrar el buscador") : T("+ A\u00f1adir carta a {g}", { g:g }));
     add.addEventListener("click", function(){
       // Sin cat\u00e1logo compilado no hay nada que buscar: fila en blanco y a mano.
       if (!CARD_DB.__n){
@@ -405,9 +720,9 @@ function renderTiles(){
   function sev(p, warnAt, critAt){ return p >= critAt ? "v-crit" : (p >= warnAt ? "v-warn" : "v-good"); }
 
   var tiles = [
-    { lbl:"Mano sin ningún Lv.3", val:sinLv3, cls:sev(sinLv3,.22,.32), sub:"No puedes subir de crianza a tiempo." },
-    { lbl:"Sin Lv.3 y sin Tamer", val:muerta, cls:sev(muerta,.06,.12), sub:"Mano muerta: nada que hacer en el turno 1." },
-    { lbl:"Solo Lv.5 / 6 / 7", val:ladrillo, cls:sev(ladrillo,.01,.03), sub:"Ladrillo: 5 cartas que no puedes pagar." }
+    { lbl:T("Mano sin ningún Lv.3"), val:sinLv3, cls:sev(sinLv3,.22,.32), sub:T("No puedes subir de crianza a tiempo.") },
+    { lbl:T("Sin Lv.3 y sin Tamer"), val:muerta, cls:sev(muerta,.06,.12), sub:T("Mano muerta: nada que hacer en el turno 1.") },
+    { lbl:T("Solo Lv.5 / 6 / 7"), val:ladrillo, cls:sev(ladrillo,.01,.03), sub:T("Ladrillo: 5 cartas que no puedes pagar.") }
   ];
   var host = document.getElementById("tiles");
   host.textContent = "";
@@ -440,7 +755,7 @@ function renderCurve(){
   var host = document.getElementById("curve");
   host.textContent = "";
   if (!maxQ){
-    host.innerHTML = '<div class="pk-empty">El mazo está vacío.</div>';
+    host.innerHTML = '<div class="pk-empty">' + T("El mazo está vacío.") + '</div>';
     document.getElementById("afford").textContent = "";
     return;
   }
@@ -471,7 +786,7 @@ function renderCurve(){
     chip.innerHTML = '<span class="af-k mono"></span><span class="af-p mono"></span><span class="af-n"></span>';
     chip.querySelector(".af-k").textContent = "≤ " + t;
     chip.querySelector(".af-p").textContent = fmt1(p);
-    chip.querySelector(".af-n").textContent = acum + (acum === 1 ? " carta" : " cartas");
+    chip.querySelector(".af-n").textContent = acum === 1 ? T("1 carta") : T("{n} cartas", { n:acum });
     af.appendChild(chip);
     if (p > 0.999) break;              // a partir de aquí ya es siempre que sí
   }
@@ -483,9 +798,8 @@ function renderCurve(){
    no tendría sentido calcularlo, porque el efecto sobre el grupo depende solo
    del total del grupo, y el efecto sobre la carta suelta ya está en la lista. */
 function fmtPP(d){
-  if (Math.abs(d) < 5e-4) return "0,0 pp";   // por debajo de 0,05 pp ya no se ve
-  var v = (Math.abs(d) * 100).toFixed(1).replace(".", ",");
-  return (d > 0 ? "+" : "−") + v + " pp";
+  if (Math.abs(d) < 5e-4) return dec("0.0") + " pp";   // por debajo de 0,05 pp ya no se ve
+  return (d > 0 ? "+" : "−") + dec((Math.abs(d) * 100).toFixed(1)) + " pp";
 }
 
 function renderMarginal(){
@@ -546,6 +860,8 @@ function guardarRef(){
 }
 
 // dir: +1 si subir es mejor, -1 si subir es peor, 0 si es solo una cuenta.
+// Las etiquetas se traducen al pintar, no aquí: esta lista se crea una sola vez
+// y el idioma puede cambiar después.
 var CMP_FILAS = [
   { k:"__N",      lbl:"Cartas en el mazo", dir:0, pct:false },
   { k:"__eggs",   lbl:"Digi-Egg",          dir:0, pct:false },
@@ -578,27 +894,25 @@ function renderCompare(){
   document.getElementById("ref-clear").hidden = !refDeck;
   document.getElementById("ref-load").hidden = !refDeck;
   document.getElementById("ref-set").textContent = refDeck
-    ? "Sustituir la referencia por este mazo" : "Fijar este mazo como referencia";
+    ? T("Sustituir la referencia por este mazo") : T("Fijar este mazo como referencia");
 
   if (!refDeck){
     var v = document.createElement("p");
     v.className = "note";
     v.style.padding = "0";
-    v.textContent = "Fija este mazo como referencia, carga otro con el importador o el buscador, "
-      + "y aquí verás qué se gana y qué se pierde. Como todo es combinatoria exacta, la diferencia "
-      + "es la diferencia real entre los dos mazos, no ruido de un muestreo.";
+    v.textContent = T("Fija este mazo como referencia, carga otro con el importador o el buscador, y aquí verás qué se gana y qué se pierde. Como todo es combinatoria exacta, la diferencia es la diferencia real entre los dos mazos, no ruido de un muestreo.");
     host.appendChild(v);
     return;
   }
 
   var cab = document.createElement("div");
   cab.className = "cmp-head";
-  cab.innerHTML = '<span class="eyebrow">Referencia</span>'
-    + '<input class="cmp-nm" type="text" aria-label="Nombre de la referencia">'
+  cab.innerHTML = '<span class="eyebrow">' + T("Referencia") + '</span>'
+    + '<input class="cmp-nm" type="text" aria-label="' + T("Ponle un nombre") + '">'
     + '<span class="cmp-when mono"></span>';
   var nm = cab.querySelector(".cmp-nm");
   nm.value = refDeck.nombre || "";
-  nm.placeholder = "Ponle un nombre";
+  nm.placeholder = T("Ponle un nombre");
   nm.addEventListener("input", function(){ refDeck.nombre = this.value; guardarRef(); });
   cab.querySelector(".cmp-when").textContent = refDeck.cuando || "";
   host.appendChild(cab);
@@ -607,14 +921,15 @@ function renderCompare(){
 
   var filas = CMP_FILAS.slice();
   GROUPS.forEach(function(g){
-    filas.splice(2 + GROUPS.indexOf(g), 0, { k:"g:" + g, lbl:"≥1 " + g + " en mano", dir:1, pct:true, g:g });
+    filas.splice(2 + GROUPS.indexOf(g), 0, { k:"g:" + g, lbl:T("≥1 {g} en mano", { g:g }), dir:1, pct:true, g:g, listo:true });
   });
 
   var wrap = document.createElement("div");
   wrap.style.overflowX = "auto";
   var t = document.createElement("table");
   t.className = "gtable";
-  t.innerHTML = "<thead><tr><th>Métrica</th><th>Referencia</th><th>Este mazo</th><th>Diferencia</th></tr></thead>";
+  t.innerHTML = "<thead><tr><th>" + T("Métrica") + "</th><th>" + T("Referencia")
+    + "</th><th>" + T("Este mazo") + "</th><th>" + T("Diferencia") + "</th></tr></thead>";
   var tb = document.createElement("tbody");
 
   filas.forEach(function(f){
@@ -636,9 +951,9 @@ function renderCompare(){
     var lbl = tr.querySelector(".cmp-lbl");
     if (f.g){
       lbl.innerHTML = '<span class="gname"><i class="sw" style="background:' + gcol(f.g) + '"></i><span></span></span>';
-      lbl.querySelector(".gname span").textContent = f.lbl;
+      lbl.querySelector(".gname span").textContent = f.listo ? f.lbl : T(f.lbl);
     } else {
-      lbl.textContent = f.lbl;
+      lbl.textContent = f.listo ? f.lbl : T(f.lbl);
     }
     tb.appendChild(tr);
   });
@@ -669,7 +984,7 @@ document.getElementById("ref-load").addEventListener("click", function(){
   var imp = document.getElementById("importer");
   if (imp) imp.open = true;
   document.getElementById("imp-text").value = refDeck.lista;
-  impSay("Lista de la referencia volcada. Pulsa «Cargar lista» para montarla.");
+  impSay(T("Lista de la referencia volcada. Pulsa «Cargar lista» para montarla."));
   document.getElementById("imp-text").scrollIntoView({ block:"center" });
 });
 
@@ -773,7 +1088,7 @@ function wireHover(on){
     cross.setAttribute("x1", xAt(t)); cross.setAttribute("x2", xAt(t));
     cross.setAttribute("opacity", "1");
 
-    var html = '<div class="t-h">Turno ' + t + ' · ' + seenAt(t) + ' cartas vistas</div>';
+    var html = '<div class="t-h">' + T("Turno {t} · {n} cartas vistas", { t:t, n:seenAt(t) }) + '</div>';
     on.forEach(function(d){
       html += '<div class="t-r"><span class="t-n"><i style="background:' + d.col + '"></i>' + d.g + '</span><b>'
             + fmt1(d.pts[t-1]) + '</b></div>';
@@ -870,8 +1185,8 @@ function renderLine(){
   var p = counts.length ? pAllGroups(counts, N, n) : 0;
   document.getElementById("line-p").textContent = counts.length ? fmt1(p) : "—";
   document.getElementById("line-cap").textContent = counts.length
-    ? "de abrir con " + S.line.join(" + ") + " en la misma mano de " + n + "."
-    : "Elige arriba qué niveles debe traer la línea.";
+    ? T("de abrir con {x} en la misma mano de {n}.", { x:S.line.join(" + "), n:n })
+    : T("Elige arriba qué niveles debe traer la línea.");
   document.getElementById("line-mull").textContent = counts.length ? fmt1(1 - Math.pow(1 - p, 2)) : "—";
 
   var strip = document.getElementById("line-turns");
@@ -886,7 +1201,7 @@ function renderLine(){
     d.innerHTML = '<div class="t"></div><div class="p"></div>';
     d.querySelector(".t").textContent = st[0];
     d.querySelector(".p").textContent = counts.length ? (pt * 100).toFixed(0) + "%" : "—";
-    d.title = st[1] + " cartas vistas";
+    d.title = st[1] === 1 ? T("1 carta") : T("{n} cartas", { n:st[1] });
     strip.appendChild(d);
   });
 
@@ -911,7 +1226,7 @@ function renderLine(){
 function renderSecurity(){
   var N = totalCards(), n = handSize(), sec = secSize();
   document.getElementById("sec-n").textContent = S.sec;
-  document.getElementById("wall-s").textContent = sec;
+  document.getElementById("wall-any-lbl").textContent = T("Alguna de las {s} lo frena", { s:sec });
 
   var tb = document.getElementById("secbody");
   tb.textContent = "";
@@ -936,11 +1251,11 @@ function renderSecurity(){
   // muro: un Digimon de seguridad frena si su DP iguala o supera al atacante (el empate mata a los dos)
   var dp = S.dp, walls = 0;
   S.cards.forEach(function(c){ if (c.dp && c.dp >= dp) walls += c.q; });
-  document.getElementById("dp-n").textContent = dp.toLocaleString("es");
+  document.getElementById("dp-n").textContent = num(dp);
   document.getElementById("wall-1").textContent = N ? fmt1(walls / N) : "—";
   document.getElementById("wall-any").textContent = sec ? fmt1(pAtLeast(walls, 1, N, sec)) : "—";
   document.getElementById("wall-note").textContent =
-    walls + " de " + N + " cartas del mazo son Digimon con " + dp.toLocaleString("es") + " DP o más.";
+    T("{w} de {N} cartas del mazo son Digimon con {dp} DP o más.", { w:walls, N:N, dp:num(dp) });
 }
 
 /* ---------------- simulador ---------------- */
@@ -1020,7 +1335,7 @@ function pcard(c, hidden){
   d.style.borderTopColor = gcol(c.g);
   d.innerHTML = '<div class="pimg ' + artClass(c) + '"></div>'
               + '<div class="pn"></div><div class="pm"></div>';
-  d.querySelector(".pn").textContent = c.n || "(sin nombre)";
+  d.querySelector(".pn").textContent = c.n || T("(sin nombre)");
   d.querySelector(".pm").textContent = c.g + " · " + c.c + (c.dp ? " · " + (c.dp/1000) + "k" : "");
   if (c.id) d.title = c.n + " · " + c.id;
   return d;
@@ -1040,7 +1355,8 @@ function renderSim(){
   var ss = document.getElementById("sim-sec");
   hh.textContent = ""; ss.textContent = "";
   if (!sim.hand.length){
-    hh.innerHTML = '<div class="note" style="padding:0">Pulsa <b>Barajar y robar</b> para repartir una mano de este mazo.</div>';
+    hh.innerHTML = '<div class="note" style="padding:0">'
+      + T("Pulsa <b>Barajar y robar</b> para repartir una mano de este mazo.") + '</div>';
   } else {
     sim.hand.forEach(function(c){ hh.appendChild(pcard(c, false)); });
     sim.sec.forEach(function(c){ ss.appendChild(pcard(c, !sim.reveal)); });
@@ -1054,7 +1370,7 @@ function renderSim(){
     var checks = [["Lv.3", !!has["Lv.3"]], ["Tamer", !!has["Tamer"]]];
     var lineOk = S.line.length > 0;
     S.line.forEach(function(g){ if (!has[g]) lineOk = false; });
-    checks.push(["Línea completa", lineOk]);
+    checks.push([T("Línea completa"), lineOk]);
     checks.forEach(function(c){
       var b = document.createElement("span");
       b.className = "vd " + (c[1] ? "yes" : "no");
@@ -1063,15 +1379,16 @@ function renderSim(){
     });
   }
 
-  document.getElementById("runs-lbl").textContent = "· " + sim.runs.toLocaleString("es") + (sim.runs === 1 ? " mano" : " manos");
+  document.getElementById("runs-lbl").textContent =
+    sim.runs === 1 ? T("· 1 mano") : T("· {n} manos", { n:num(sim.runs) });
 
   var lv3 = groupCount("Lv.3"), tam = groupCount("Tamer");
   var exactDead = (N - lv3 - tam >= n) ? Math.exp(logC(N - lv3 - tam, n) - logC(N, n)) : 0;
   var rows = [
-    ["Con algún Lv.3", sim.hit.lv3, pAtLeast(lv3, 1, N, n)],
-    ["Con algún Tamer", sim.hit.tamer, pAtLeast(tam, 1, N, n)],
-    ["Con la línea completa", sim.hit.line, S.line.length ? pAllGroups(lineCounts(), N, n) : 0],
-    ["Mano muerta", sim.hit.dead, exactDead]
+    [T("Con algún Lv.3"), sim.hit.lv3, pAtLeast(lv3, 1, N, n)],
+    [T("Con algún Tamer"), sim.hit.tamer, pAtLeast(tam, 1, N, n)],
+    [T("Con la línea completa"), sim.hit.line, S.line.length ? pAllGroups(lineCounts(), N, n) : 0],
+    [T("Mano muerta"), sim.hit.dead, exactDead]
   ];
   var host = document.getElementById("tally");
   host.textContent = "";
@@ -1082,7 +1399,7 @@ function renderSim(){
     d.innerHTML = '<div class="k"></div><div class="v"><b></b><em></em></div>';
     d.querySelector(".k").textContent = r[0];
     d.querySelector("b").textContent = sim.runs ? fmt1(obs) : "—";
-    d.querySelector("em").textContent = "exacto " + fmt1(r[2]);
+    d.querySelector("em").textContent = T("exacto {p}", { p: fmt1(r[2]) });
     host.appendChild(d);
   });
 }
@@ -1132,7 +1449,7 @@ document.getElementById("go-second").addEventListener("click", function(){ S.fir
 document.getElementById("tbl-toggle").addEventListener("click", function(){
   showTable = !showTable;
   this.setAttribute("aria-pressed", showTable ? "true" : "false");
-  this.textContent = showTable ? "Ocultar tabla" : "Ver tabla";
+  this.textContent = showTable ? T("Ocultar tabla") : T("Ver tabla");
   renderChart();
 });
 document.getElementById("reset-btn").addEventListener("click", function(){
@@ -1146,7 +1463,7 @@ document.getElementById("draw-btn").addEventListener("click", drawHand);
 document.getElementById("reveal-btn").addEventListener("click", function(){
   sim.reveal = !sim.reveal;
   this.setAttribute("aria-pressed", sim.reveal ? "true" : "false");
-  this.textContent = sim.reveal ? "Ocultar seguridad" : "Revelar seguridad";
+  this.textContent = sim.reveal ? T("Ocultar seguridad") : T("Revelar seguridad");
   renderSim();
 });
 document.getElementById("sim1k").addEventListener("click", function(){ simBatch(1000); });
@@ -1195,7 +1512,7 @@ function setCode(id){
 function setLabel(code){
   var fam = code.match(/^([A-Z]+)/);
   var nombre = fam ? SET_FAMILIES[fam[1]] : null;
-  return nombre ? code + " · " + nombre : code;
+  return nombre ? code + " · " + T(nombre) : code;
 }
 function setSortKey(code){
   var m = code.match(/^([A-Z]+)(\d*)$/);
@@ -1253,11 +1570,11 @@ function addFromCatalog(rec){
   var arr = esHuevo ? S.eggs : S.cards;
 
   if (esHuevo && eggCards() >= EGG_MAX){
-    return "El mazo de huevos ya tiene " + EGG_MAX + " cartas.";
+    return T("El mazo de huevos ya tiene {n} cartas.", { n: EGG_MAX });
   }
   for (var i = 0; i < arr.length; i++){
     if (arr[i].id === rec[0]){
-      if (arr[i].q >= COPY_MAX) return "Ya hay " + COPY_MAX + " copias de " + rec[1] + ".";
+      if (arr[i].q >= COPY_MAX) return T("Ya hay {n} copias de {c}.", { n: COPY_MAX, c: rec[1] });
       arr[i].q++;
       return null;
     }
@@ -1274,7 +1591,7 @@ function renderPickerLista(host){
   if (!r.total){
     var v = document.createElement("div");
     v.className = "pk-empty";
-    v.textContent = "Ninguna carta coincide.";
+    v.textContent = T("Ninguna carta coincide.");
     host.appendChild(v);
     return r;
   }
@@ -1294,7 +1611,7 @@ function renderPickerLista(host){
     var g = esHuevo ? EGG_GROUP : (GROUPS[rec[2]] || "—");
     var bits = [g];
     if (rec[3]) bits.push("coste " + rec[3]);
-    if (rec[4]) bits.push(rec[4].toLocaleString("es") + " DP");
+    if (rec[4]) bits.push(num(rec[4]) + " DP");
     b.querySelector(".pk-g").textContent = bits.join(" · ");
 
     b.addEventListener("click", function(){
@@ -1307,7 +1624,7 @@ function renderPickerLista(host){
   if (r.total > r.filas.length){
     var mas = document.createElement("div");
     mas.className = "pk-empty";
-    mas.textContent = "…y " + (r.total - r.filas.length) + " más. Afina la búsqueda.";
+    mas.textContent = T("…y {n} más. Afina la búsqueda.", { n: r.total - r.filas.length });
     host.appendChild(mas);
   }
   return r;
@@ -1320,14 +1637,14 @@ function renderPicker(){
   var head = document.createElement("div");
   head.className = "pk-head";
   head.innerHTML =
-    '<input class="pk-q" type="search" placeholder="Nombre o ID de la carta…" aria-label="Buscar carta por nombre o ID">'
+    '<input class="pk-q" type="search" placeholder="' + T("Nombre o ID de la carta…") + '" aria-label="' + T("Buscar carta por nombre o ID") + '">'
   + '<select class="pk-set" aria-label="Expansión"></select>'
-  + '<button class="pk-x" title="Cerrar" aria-label="Cerrar el selector">×</button>';
+  + '<button class="pk-x" title="' + T("Cerrar") + '" aria-label="' + T("Cerrar el selector") + '">×</button>';
   box.appendChild(head);
 
   var sel = head.querySelector(".pk-set");
   var op0 = document.createElement("option");
-  op0.value = ""; op0.textContent = "Todas las expansiones";
+  op0.value = ""; op0.textContent = T("Todas las expansiones");
   sel.appendChild(op0);
   SET_LIST.forEach(function(c){
     var o = document.createElement("option");
@@ -1343,7 +1660,7 @@ function renderPicker(){
   var foot = document.createElement("div");
   foot.className = "pk-foot";
   foot.innerHTML = '<span class="pk-count"></span>'
-    + '<button class="btn ghost tiny pk-blank">Añadir carta en blanco</button>';
+    + '<button class="btn ghost tiny pk-blank">' + T("Añadir carta en blanco") + '</button>';
   box.appendChild(foot);
 
   var q = head.querySelector(".pk-q");
@@ -1351,7 +1668,7 @@ function renderPicker(){
 
   function repintar(){
     var r = renderPickerLista(lista);
-    var txt = r.total + (r.total === 1 ? " carta" : " cartas");
+    var txt = r.total === 1 ? T("1 carta") : T("{n} cartas", { n: r.total });
     cuenta.textContent = picker.msg ? picker.msg : txt;
     cuenta.classList.toggle("warn", !!picker.msg);
   }
@@ -1373,7 +1690,7 @@ function renderPicker(){
   });
   foot.querySelector(".pk-blank").addEventListener("click", function(){
     if (picker.isEgg){
-      if (eggCards() >= EGG_MAX){ picker.msg = "El mazo de huevos ya tiene " + EGG_MAX + " cartas."; repintar(); return; }
+      if (eggCards() >= EGG_MAX){ picker.msg = T("El mazo de huevos ya tiene {n} cartas.", { n:EGG_MAX }); repintar(); return; }
       S.eggs.push({ n:"", g:EGG_GROUP, c:0, dp:0, q:1 });
       focusEgg = S.eggs.length - 1;
     } else {
@@ -1399,7 +1716,7 @@ function parseList(text){
 
   function dropPending(){
     if (!pend) return;
-    issues.push({ kind:"bad", ln:pend.ln, line:pend.raw, why:"sin ID de carta" });
+    issues.push({ kind:"bad", ln:pend.ln, line:pend.raw, why:T("sin ID de carta") });
     pend = null;
   }
 
@@ -1416,14 +1733,14 @@ function parseList(text){
       // se quedó huérfana y hay que decirlo.
       if (qm) { dropPending(); pend = { q:parseInt(qm[1],10), ln:ln, raw:line }; }
       else if (pend) pend.raw += " " + line;          // el nombre venía partido
-      else issues.push({ kind:"bad", ln:ln, line:line, why:"sin ID de carta" });
+      else issues.push({ kind:"bad", ln:ln, line:line, why:T("sin ID de carta") });
       continue;
     }
 
     // Con ID y copias propias, lo que hubiera pendiente nunca llegó a tener ID.
     if (qm) dropPending();
     var q = qm ? parseInt(qm[1], 10) : (pend ? pend.q : 1);
-    if (!qm && !pend) issues.push({ kind:"warn", ln:ln, line:line, why:"sin número de copias, se asume 1" });
+    if (!qm && !pend) issues.push({ kind:"warn", ln:ln, line:line, why:T("sin número de copias, se asume 1") });
     pend = null;
     out.push({ id: idm[1], q: q, ln: ln, line: line });
   }
@@ -1439,11 +1756,11 @@ function resolveList(parsed){
   parsed.entries.forEach(function(e){
     var rec = CARD_DB[e.id.toUpperCase()];
     if (!rec){
-      issues.push({ kind:"bad", ln:e.ln, line:e.line, why:"no está en el catálogo" });
+      issues.push({ kind:"bad", ln:e.ln, line:e.line, why:T("no está en el catálogo") });
       return;
     }
     if (rec[2] === OUT_OF_DECK){
-      issues.push({ kind:"warn", ln:e.ln, line:e.line, why:"carta sin nivel: fuera del mazo" });
+      issues.push({ kind:"warn", ln:e.ln, line:e.line, why:T("carta sin nivel: fuera del mazo") });
       return;
     }
     var prev = byId[rec[0]];
@@ -1458,7 +1775,7 @@ function resolveList(parsed){
   function capCopias(c){
     if (c.q > COPY_MAX){
       issues.push({ kind:"warn", ln:c.ln, line:c.q + " " + c.n + " " + c.id,
-                    why:"más de " + COPY_MAX + " copias, se recorta a " + COPY_MAX });
+                    why:T("más de {n} copias, se recorta a {n}", { n: COPY_MAX }) });
       c.q = COPY_MAX;
     }
   }
@@ -1472,7 +1789,7 @@ function resolveList(parsed){
     var sitio = Math.max(0, EGG_MAX - acum);
     if (c.q > sitio){
       issues.push({ kind:"warn", ln:c.ln, line:c.q + " " + c.n + " " + c.id,
-                    why:"el mazo de huevos no pasa de " + EGG_MAX + " cartas, se recorta a " + sitio });
+                    why:T("el mazo de huevos no pasa de {m} cartas, se recorta a {s}", { m: EGG_MAX, s: sitio }) });
       c.q = sitio;
     }
     acum += c.q;
@@ -1527,8 +1844,8 @@ function renderReport(res, loaded){
 
   var tally = document.createElement("div");
   tally.className = "imp-tally";
-  var bits = ["<b>" + res.cards.length + "</b> cartas distintas",
-              "<b>" + total + "</b> copias"];
+  var bits = [T("{n} cartas distintas", { n: "<b>" + res.cards.length + "</b>" }),
+              T("{n} copias", { n: "<b>" + total + "</b>" })];
   GROUPS.forEach(function(g){ if (kinds[g]) bits.push(g + " <b>" + kinds[g] + "</b>"); });
   if (totalEggs) bits.push("Digi-Egg <b>" + totalEggs + "</b>");
   tally.innerHTML = bits.join(" <span style='color:var(--line-strong)'>·</span> ");
@@ -1540,7 +1857,7 @@ function renderReport(res, loaded){
     res.issues.forEach(function(is){
       var li = document.createElement("li");
       li.innerHTML = '<span class="tag ' + is.kind + '"></span><span><code></code> <span class="why"></span></span>';
-      li.querySelector(".tag").textContent = is.kind === "bad" ? "sin cargar" : "aviso";
+      li.querySelector(".tag").textContent = is.kind === "bad" ? T("sin cargar") : T("aviso");
       li.querySelector("code").textContent = is.line;
       li.querySelector(".why").textContent = is.why;
       ul.appendChild(li);
@@ -1551,8 +1868,9 @@ function renderReport(res, loaded){
   if (loaded && total !== 50){
     var w = document.createElement("div");
     w.className = "imp-tally";
-    w.innerHTML = "<span style='color:var(--crit)'>El mazo tiene <b>" + total
-      + "</b> copias, no 50. Ajusta la lista o las copias en el editor.</span>";
+    w.innerHTML = "<span style='color:var(--crit)'>"
+      + T("El mazo tiene <b>{n}</b> copias, no 50. Ajusta la lista o las copias en el editor.", { n: total })
+      + "</span>";
     impReport.appendChild(w);
   }
 
@@ -1560,23 +1878,24 @@ function renderReport(res, loaded){
   if (loaded && totalEggs > EGG_MAX){
     var we = document.createElement("div");
     we.className = "imp-tally";
-    we.innerHTML = "<span style='color:var(--crit)'>El mazo de huevos tiene <b>" + totalEggs
-      + "</b> cartas, más de " + EGG_MAX + ".</span>";
+    we.innerHTML = "<span style='color:var(--crit)'>"
+      + T("El mazo de huevos tiene <b>{n}</b> cartas, más de {m}.", { n: totalEggs, m: EGG_MAX })
+      + "</span>";
     impReport.appendChild(we);
   }
 }
 
 document.getElementById("imp-load").addEventListener("click", function(){
   if (!CARD_DB.__n){
-    impSay("Esta copia se compiló sin catálogo, así que no puede resolver los IDs.");
+    impSay(T("Esta copia se compiló sin catálogo, así que no puede resolver los IDs."));
     return;
   }
   var text = impText.value;
-  if (!text.trim()){ impSay("Pega una lista primero."); renderReport(null); return; }
+  if (!text.trim()){ impSay(T("Pega una lista primero.")); renderReport(null); return; }
 
   var res = resolveList(parseList(text));
   if (!res.cards.length && !res.eggs.length){
-    impSay("No se reconoció ninguna carta.");
+    impSay(T("No se reconoció ninguna carta."));
     renderReport(res, false);
     return;
   }
@@ -1586,7 +1905,9 @@ document.getElementById("imp-load").addEventListener("click", function(){
   S.eggs = res.eggs;
   renderAll();
   var bad = res.issues.filter(function(i){ return i.kind === "bad"; }).length;
-  impSay("Mazo cargado" + (bad ? " · " + bad + (bad === 1 ? " línea sin cargar" : " líneas sin cargar") : "."));
+  impSay(!bad ? T("Mazo cargado.")
+    : (bad === 1 ? T("Mazo cargado · 1 línea sin cargar")
+                 : T("Mazo cargado · {n} líneas sin cargar", { n: bad })));
   renderReport(res, true);
 });
 
@@ -1596,20 +1917,20 @@ document.getElementById("imp-copy").addEventListener("click", function(){
   renderReport(null);
   if (navigator.clipboard && navigator.clipboard.writeText){
     navigator.clipboard.writeText(txt).then(
-      function(){ impSay("Lista copiada al portapapeles y volcada aquí arriba."); },
-      function(){ impSay("Lista volcada aquí arriba; cópiala a mano."); }
+      function(){ impSay(T("Lista copiada al portapapeles y volcada aquí arriba.")); },
+      function(){ impSay(T("Lista volcada aquí arriba; cópiala a mano.")); }
     );
   } else {
-    impSay("Lista volcada aquí arriba; cópiala a mano.");
+    impSay(T("Lista volcada aquí arriba; cópiala a mano."));
   }
 });
 
 document.getElementById("imp-clear").addEventListener("click", function(){
-  impText.value = ""; impSay(""); renderReport(null); impText.focus();
+  impText.value = ""; impSay(T("")); renderReport(null); impText.focus();
 });
 
 if (!CARD_DB.__n){
-  impSay("Compilado sin catálogo: ejecuta tools/fetch-cards.ps1 y vuelve a construir.");
+  impSay(T("Compilado sin catálogo: ejecuta tools/fetch-cards.ps1 y vuelve a construir."));
   document.getElementById("imp-load").disabled = true;
 }
 
@@ -1628,7 +1949,7 @@ function csvTexto(){
   var N = totalCards(), n = handSize();
   var rows = [["carta","grupo","coste","copias","p_al_menos_1","p_al_menos_2"]];
   S.cards.forEach(function(c){
-    rows.push([c.n || "(sin nombre)", c.g, c.c, c.q,
+    rows.push([c.n || T("(sin nombre)"), c.g, c.c, c.q,
       c.q ? (pAtLeast(c.q,1,N,n)*100).toFixed(4) : "0",
       c.q >= 2 ? (pAtLeast(c.q,2,N,n)*100).toFixed(4) : "0"]);
   });
@@ -1645,7 +1966,7 @@ function csvTexto(){
     rows.push([]);
     rows.push(["digi-egg (mazo aparte, no cuenta para las 50)","","","copias","",""]);
     eggRows.forEach(function(c){
-      rows.push([c.n || "(sin nombre)", EGG_GROUP, "", c.q, "", ""]);
+      rows.push([c.n || T("(sin nombre)"), EGG_GROUP, "", c.q, "", ""]);
     });
   }
   return rows.map(function(r){
@@ -1661,7 +1982,7 @@ function csvTexto(){
   if (artifact){
     saveBtn.disabled = false;
     saveBtn.addEventListener("click", async function(){
-      saveBtn.disabled = true; msg("Guardando…");
+      saveBtn.disabled = true; msg(T("Guardando…"));
       var json = JSON.stringify(S).replace(/</g, "\\u003c");
       var out = PRISTINE.replace(
         /(<script type="application\/json" id="deck-state">)[\s\S]*?(<\/script>)/,
@@ -1669,12 +1990,12 @@ function csvTexto(){
       );
       try {
         await artifact.publish(out);
-        msg("Guardado. Esta versión del mazo es la que verá quien abra la página.");
+        msg(T("Guardado. Esta versión del mazo es la que verá quien abra la página."));
       } catch(err){
         var code = err && err.code;
-        if (code === "conflict") msg("Alguien guardó antes que tú; la página se recargará con esa versión.");
-        else if (code === "not_granted" || code === "not_writer") { msg("Solo lectura: no puedes guardar en esta página."); return; }
-        else msg("No se pudo guardar. Vuelve a intentarlo.");
+        if (code === "conflict") msg(T("Alguien guardó antes que tú; la página se recargará con esa versión."));
+        else if (code === "not_granted" || code === "not_writer") { msg(T("Solo lectura: no puedes guardar en esta página.")); return; }
+        else msg(T("No se pudo guardar. Vuelve a intentarlo."));
         saveBtn.disabled = false;
       }
     });
@@ -1688,7 +2009,7 @@ function csvTexto(){
     var datos = "﻿" + csvTexto();
     if (downloads){
       try { await downloads.save({ filename:CSV_NOMBRE, data:datos }); }
-      catch(e){ msg("Descarga cancelada."); }
+      catch(e){ msg(T("Descarga cancelada.")); }
       return;
     }
     // Servida como página normal: descarga del navegador de toda la vida.
@@ -1701,9 +2022,9 @@ function csvTexto(){
       a.click();
       a.remove();
       setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
-      msg("CSV descargado.");
+      msg(T("CSV descargado."));
     } catch(e){
-      msg("Este navegador no ha dejado descargar el CSV.");
+      msg(T("Este navegador no ha dejado descargar el CSV."));
     }
   });
 })();
@@ -1730,6 +2051,7 @@ function renderAll(){
   renderSim();
   renderChart();
 }
+applyLang();
 renderAll();
 
 // Arrancar sin mazo es lo normal: se abre el importador, que es por donde se

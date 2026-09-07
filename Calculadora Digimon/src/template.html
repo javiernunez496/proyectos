@@ -29,25 +29,37 @@ try {
 } catch (e) {}
 </script>
 
+<!-- El texto de la página está en español. Los bloques con data-i18n son los que
+     el selector de idioma sustituye por su versión inglesa; el original se
+     guarda al arrancar, así que lo que no esté traducido se queda en español en
+     vez de desaparecer. Nunca se pone data-i18n en algo que contenga un id que
+     el JavaScript necesite: al cambiar de idioma se rehace su contenido. -->
 <div class="wrap">
 
   <header class="top">
     <div class="title-block">
-      <div class="eyebrow">Digimon Card Game · Análisis de mazos</div>
+      <div class="eyebrow" data-i18n="eyebrow-top">Digimon Card Game · Análisis de mazos</div>
       <h1>Digimon <span class="bolt">Analytics</span></h1>
-      <p class="lede">Mide cómo se comporta un mazo antes de sentarte a jugarlo: qué abres de mano, cuánto aguanta la línea de evolución, qué se te va a seguridad y cómo cambia turno a turno. Cálculo <b>hipergeométrico exacto</b>, no simulación.</p>
+      <p class="lede" data-i18n="lede">Mide cómo se comporta un mazo antes de sentarte a jugarlo: qué abres de mano, cuánto aguanta la línea de evolución, qué se te va a seguridad y cómo cambia turno a turno. Cálculo <b>hipergeométrico exacto</b>, no simulación.</p>
     </div>
     <div class="meter-box">
       <div class="theme-row">
-        <span class="eyebrow">Tema</span>
-        <div class="switch" role="group" aria-label="Tema de la página">
+        <span class="eyebrow" data-i18n="lbl-idioma">Idioma</span>
+        <div class="switch" role="group" data-i18n-aria="aria-idioma" aria-label="Idioma de la página">
+          <button id="lang-es" aria-pressed="true">ES</button>
+          <button id="lang-en" aria-pressed="false">EN</button>
+        </div>
+      </div>
+      <div class="theme-row">
+        <span class="eyebrow" data-i18n="lbl-tema">Tema</span>
+        <div class="switch" role="group" data-i18n-aria="aria-tema" aria-label="Tema de la página">
           <button id="theme-auto" aria-pressed="true">Auto</button>
-          <button id="theme-light" aria-pressed="false">Claro</button>
-          <button id="theme-dark" aria-pressed="false">Oscuro</button>
+          <button id="theme-light" aria-pressed="false" data-i18n="th-claro">Claro</button>
+          <button id="theme-dark" aria-pressed="false" data-i18n="th-oscuro">Oscuro</button>
         </div>
       </div>
       <div class="meter-head">
-        <div class="eyebrow">Cartas en el mazo</div>
+        <div class="eyebrow" data-i18n="lbl-cartas-mazo">Cartas en el mazo</div>
         <div class="meter-count mono"><span id="deck-n">50</span><small>/50</small></div>
       </div>
       <div class="gauge">
@@ -67,38 +79,38 @@ try {
   <!-- Solo uno de los dos se ve: el de arranque mientras no haya mazo. -->
   <div class="strip empty" id="empty-note" hidden>
     <div class="zap">◆</div>
-    <p><b>Empieza cargando un mazo.</b> Pega tu lista en «Cargar una lista» aquí abajo, o móntalo carta a carta con el buscador que hay en cada nivel de la lista del mazo. Hasta que haya cartas, todo lo demás está a cero: no hay nada que calcular todavía.</p>
+    <p data-i18n="empty-note"><b>Empieza cargando un mazo.</b> Pega tu lista en «Cargar una lista» aquí abajo, o móntalo carta a carta con el buscador que hay en cada nivel de la lista del mazo. Hasta que haya cartas, todo lo demás está a cero: no hay nada que calcular todavía.</p>
   </div>
 
   <div class="strip" id="intro-note">
     <div class="zap">⚡</div>
-    <p><b>Ningún número está atado a un mazo concreto.</b> Pega tu lista o móntala con el buscador, y todo lo de abajo —mano inicial, línea de evolución, seguridad, turno a turno— se recalcula sobre esas 50 cartas. Como es combinatoria exacta y no simulación, dos mazos se pueden comparar sin ruido de por medio.</p>
+    <p data-i18n="intro-note"><b>Ningún número está atado a un mazo concreto.</b> Pega tu lista o móntala con el buscador, y todo lo de abajo —mano inicial, línea de evolución, seguridad, turno a turno— se recalcula sobre esas 50 cartas. Como es combinatoria exacta y no simulación, dos mazos se pueden comparar sin ruido de por medio.</p>
   </div>
 
   <!-- ============ IMPORTADOR DE LISTAS ============ -->
   <details class="panel importer" id="importer">
     <summary>
       <span class="sum-title">
-        <h2>Cargar una lista</h2>
-        <span class="eyebrow">Pega el formato estándar del juego y el mazo se rehace entero</span>
+        <h2 data-i18n="imp-title">Cargar una lista</h2>
+        <span class="eyebrow" data-i18n="imp-sub">Pega el formato estándar del juego y el mazo se rehace entero</span>
       </span>
       <span class="chev" aria-hidden="true">▾</span>
     </summary>
     <div class="panel-body imp-body">
-      <p class="note">Una línea por carta: <span class="mono">copias · nombre · ID</span>. Las
+      <p class="note" data-i18n="imp-note">Una línea por carta: <span class="mono">copias · nombre · ID</span>. Las
       líneas que empiezan por <span class="mono">//</span> se ignoran, y si el nombre se parte en
       dos líneas se junta solo. El nivel, el coste y los DP salen del catálogo, así que el nombre
       da igual: manda el ID.</p>
-      <textarea id="imp-text" spellcheck="false" rows="10" aria-label="Lista del mazo en formato de texto"
+      <textarea id="imp-text" spellcheck="false" rows="10" data-i18n-aria="aria-lista" aria-label="Lista del mazo en formato de texto"
 placeholder="// Digimon DeckList
 
 4 Jupitermon                     BT24-101
 2 Aegiochusmon                   BT24-014
 1 Aegiomon                          P-194"></textarea>
       <div class="imp-actions">
-        <button class="btn primary" id="imp-load">Cargar lista</button>
-        <button class="btn" id="imp-copy">Copiar el mazo actual</button>
-        <button class="btn ghost tiny" id="imp-clear">Limpiar</button>
+        <button class="btn primary" id="imp-load" data-i18n="imp-load">Cargar lista</button>
+        <button class="btn" id="imp-copy" data-i18n="imp-copy">Copiar el mazo actual</button>
+        <button class="btn ghost tiny" id="imp-clear" data-i18n="imp-clear">Limpiar</button>
         <span class="msg" id="imp-msg" role="status"></span>
       </div>
       <div class="imp-report" id="imp-report"></div>
@@ -110,8 +122,8 @@ placeholder="// Digimon DeckList
     <!-- ============ IZQUIERDA: editor de mazo ============ -->
     <section class="panel">
       <div class="panel-head">
-        <h2>Lista del mazo</h2>
-        <div class="eyebrow">≥1 &nbsp;·&nbsp; ≥2 copias en mano</div>
+        <h2 data-i18n="deck-title">Lista del mazo</h2>
+        <div class="eyebrow" data-i18n="deck-sub">≥1 &nbsp;·&nbsp; ≥2 copias en mano</div>
       </div>
       <div class="panel-body" id="decklist"></div>
     </section>
@@ -120,34 +132,34 @@ placeholder="// Digimon DeckList
     <section class="panel" id="results">
       <div class="ctrls">
         <div class="ctrl">
-          <span>Mano</span>
+          <span data-i18n="lbl-mano">Mano</span>
           <div class="step">
-            <button id="hand-minus" aria-label="Reducir tamaño de mano">−</button>
+            <button id="hand-minus" data-i18n-aria="aria-mano-menos" aria-label="Reducir tamaño de mano">−</button>
             <div class="q mono" id="hand-n">5</div>
-            <button id="hand-plus" aria-label="Aumentar tamaño de mano">+</button>
+            <button id="hand-plus" data-i18n-aria="aria-mano-mas" aria-label="Aumentar tamaño de mano">+</button>
           </div>
         </div>
         <div class="ctrl">
           <span>Mulligan</span>
-          <div class="switch" role="group" aria-label="Considerar mulligan">
-            <button id="mull-off" aria-pressed="false">No</button>
-            <button id="mull-on" aria-pressed="true">Sí</button>
+          <div class="switch" role="group" data-i18n-aria="aria-mulligan" aria-label="Considerar mulligan">
+            <button id="mull-off" aria-pressed="false" data-i18n="mull-no">No</button>
+            <button id="mull-on" aria-pressed="true" data-i18n="mull-si">Sí</button>
           </div>
         </div>
-        <button class="btn ghost tiny" id="reset-btn" style="margin-left:auto">Restaurar</button>
+        <button class="btn ghost tiny" id="reset-btn" style="margin-left:auto" data-i18n="btn-reset">Restaurar</button>
       </div>
 
       <div style="overflow-x:auto">
         <table class="gtable">
           <thead>
-            <tr>
+            <tr data-i18n="th-grupos">
               <th>Grupo</th><th>Copias</th><th>≥1 en mano</th><th>Con mulligan</th><th>Reparto</th>
             </tr>
           </thead>
           <tbody id="gbody"></tbody>
         </table>
       </div>
-      <div class="dist-legend">
+      <div class="dist-legend" data-i18n="dist-legend">
         <span><i style="background:var(--track)"></i> 0 copias</span>
         <span><i style="background:var(--o1)"></i> 1</span>
         <span><i style="background:var(--o2)"></i> 2</span>
@@ -162,32 +174,32 @@ placeholder="// Digimon DeckList
   <div class="grid" style="margin-top:26px">
     <section class="panel">
       <div class="panel-head">
-        <h2>Curva de costes</h2>
-        <div class="eyebrow">Copias por coste de juego</div>
+        <h2 data-i18n="curve-title">Curva de costes</h2>
+        <div class="eyebrow" data-i18n="curve-sub">Copias por coste de juego</div>
       </div>
       <div class="pad">
         <div class="curve" id="curve"></div>
-        <div class="eyebrow" style="margin:18px 0 9px">Abrir con algo de coste ≤ N</div>
+        <div class="eyebrow" style="margin:18px 0 9px" data-i18n="curve-afford">Abrir con algo de coste ≤ N</div>
         <div class="afford" id="afford"></div>
-        <p class="note" style="padding:12px 0 0">Las cartas escritas a mano entran con coste 0 hasta que se lo pongas, así que aparecen en la primera barra. Los Digi-Egg no cuentan: no se pagan ni se roban.</p>
+        <p class="note" style="padding:12px 0 0" data-i18n="curve-note">Las cartas escritas a mano entran con coste 0 hasta que se lo pongas, así que aparecen en la primera barra. Los Digi-Egg no cuentan: no se pagan ni se roban.</p>
       </div>
     </section>
 
     <section class="panel">
       <div class="panel-head">
-        <h2>Impacto de una copia</h2>
-        <div class="eyebrow">Dónde rinde el próximo hueco</div>
+        <h2 data-i18n="marg-title">Impacto de una copia</h2>
+        <div class="eyebrow" data-i18n="marg-sub">Dónde rinde el próximo hueco</div>
       </div>
       <div class="pad">
         <div style="overflow-x:auto">
           <table class="gtable">
             <thead>
-              <tr><th>Grupo</th><th>Copias</th><th>≥1 en mano</th><th>Con +1</th><th>Con −1</th><th>Línea</th></tr>
+              <tr data-i18n="th-marg"><th>Grupo</th><th>Copias</th><th>≥1 en mano</th><th>Con +1</th><th>Con −1</th><th>Línea</th></tr>
             </thead>
             <tbody id="marginal"></tbody>
           </table>
         </div>
-        <p class="note" style="padding:12px 0 0">El mazo se queda en 50: dar una copia a un grupo es quitársela a otro. La columna <b>Línea</b> supone que sale de un grupo que no está en la línea; si la sacas de otro eslabón, la ganancia real es menor.</p>
+        <p class="note" style="padding:12px 0 0" data-i18n="marg-note">El mazo se queda en 50: dar una copia a un grupo es quitársela a otro. La columna <b>Línea</b> supone que sale de un grupo que no está en la línea; si la sacas de otro eslabón, la ganancia real es menor.</p>
       </div>
     </section>
   </div>
@@ -195,29 +207,29 @@ placeholder="// Digimon DeckList
   <!-- ============ SIMULADOR ============ -->
   <section class="panel" style="margin-top:26px">
     <div class="panel-head">
-      <h2>Simulador de mano</h2>
+      <h2 data-i18n="sim-title">Simulador de mano</h2>
       <div style="display:flex; gap:8px; align-items:center">
         <button class="btn ghost tiny" id="reveal-btn" aria-pressed="false">Revelar seguridad</button>
-        <button class="btn primary" id="draw-btn">Barajar y robar</button>
+        <button class="btn primary" id="draw-btn" data-i18n="sim-draw">Barajar y robar</button>
       </div>
     </div>
     <div class="sim-top">
       <div class="sim-col" style="flex:1 1 340px">
-        <div class="eyebrow">Mano <span id="hand-lbl" class="mono"></span></div>
+        <div class="eyebrow"><span data-i18n="lbl-mano2">Mano</span> <span id="hand-lbl" class="mono"></span></div>
         <div class="hand" id="sim-hand"></div>
       </div>
       <div class="sim-col" style="flex:1 1 340px">
-        <div class="eyebrow">Seguridad <span id="sec-lbl" class="mono"></span></div>
+        <div class="eyebrow"><span data-i18n="lbl-seguridad">Seguridad</span> <span id="sec-lbl" class="mono"></span></div>
         <div class="hand" id="sim-sec"></div>
       </div>
     </div>
     <div class="verdicts" id="verdicts"></div>
     <div class="tally">
       <div class="tally-head">
-        <div class="eyebrow">Frecuencia observada <span class="mono" id="runs-lbl">· 0 manos</span></div>
+        <div class="eyebrow"><span data-i18n="lbl-frecuencia">Frecuencia observada</span> <span class="mono" id="runs-lbl"></span></div>
         <div style="display:flex; gap:8px">
-          <button class="btn tiny" id="sim1k">Barajar 1.000 veces</button>
-          <button class="btn ghost tiny" id="sim-reset">Reiniciar cuenta</button>
+          <button class="btn tiny" id="sim1k"></button>
+          <button class="btn ghost tiny" id="sim-reset" data-i18n="sim-reset">Reiniciar cuenta</button>
         </div>
       </div>
       <div class="tally-grid" id="tally"></div>
@@ -227,23 +239,23 @@ placeholder="// Digimon DeckList
   <!-- ============ LÍNEA COMPLETA + SEGURIDAD ============ -->
   <div class="grid" style="margin-top:26px">
     <section class="panel">
-      <div class="panel-head"><h2>Línea completa en la mano</h2></div>
+      <div class="panel-head"><h2 data-i18n="line-title">Línea completa en la mano</h2></div>
       <div class="linebox">
         <div>
-          <div class="eyebrow" style="margin-bottom:8px">La línea necesita al menos una de cada</div>
+          <div class="eyebrow" style="margin-bottom:8px" data-i18n="line-need">La línea necesita al menos una de cada</div>
           <div class="legend" style="padding:0" id="line-chips"></div>
         </div>
         <div class="hero">
           <div class="n" id="line-p">—</div>
           <div class="cap" id="line-cap"></div>
         </div>
-        <div class="subline">Con mulligan <b id="line-mull">—</b></div>
+        <div class="subline"><span data-i18n="line-mull-lbl">Con mulligan</span> <b id="line-mull">—</b></div>
         <div>
-          <div class="eyebrow" style="margin-bottom:6px">Probabilidad acumulada por turno</div>
+          <div class="eyebrow" style="margin-bottom:6px" data-i18n="line-turns">Probabilidad acumulada por turno</div>
           <div class="turnstrip" id="line-turns"></div>
         </div>
         <div>
-          <div class="eyebrow" style="margin-bottom:8px">Lo que cuesta cada eslabón, en la mano inicial</div>
+          <div class="eyebrow" style="margin-bottom:8px" data-i18n="line-casc">Lo que cuesta cada eslabón, en la mano inicial</div>
           <div id="line-cascade"></div>
         </div>
       </div>
@@ -251,35 +263,35 @@ placeholder="// Digimon DeckList
 
     <section class="panel">
       <div class="panel-head">
-        <h2>Qué se va a la seguridad</h2>
-        <div class="ctrl"><span>Cartas</span>
+        <h2 data-i18n="sec-title">Qué se va a la seguridad</h2>
+        <div class="ctrl"><span data-i18n="lbl-cartas">Cartas</span>
           <div class="step">
-            <button id="sec-minus" aria-label="Menos cartas de seguridad">−</button>
+            <button id="sec-minus" data-i18n-aria="aria-sec-menos" aria-label="Menos cartas de seguridad">−</button>
             <div class="q mono" id="sec-n">5</div>
-            <button id="sec-plus" aria-label="Más cartas de seguridad">+</button>
+            <button id="sec-plus" data-i18n-aria="aria-sec-mas" aria-label="Más cartas de seguridad">+</button>
           </div>
         </div>
       </div>
-      <p class="note" style="padding-top:14px"><b>Repartir seguridad no altera la mano inicial.</b> Las 5 salen del mismo mazo barajado, así que tu mano sigue siendo 5 cartas al azar de las 50: da igual si repartes seguridad antes o después. Tampoco se pierden, los Tamer y Option con efecto de seguridad se disparan ahí abajo, y un Digimon frena un ataque si su DP aguanta.</p>
+      <p class="note" style="padding-top:14px" data-i18n="sec-note"><b>Repartir seguridad no altera la mano inicial.</b> Las 5 salen del mismo mazo barajado, así que tu mano sigue siendo 5 cartas al azar de las 50: da igual si repartes seguridad antes o después. Tampoco se pierden, los Tamer y Option con efecto de seguridad se disparan ahí abajo, y un Digimon frena un ataque si su DP aguanta.</p>
       <div style="overflow-x:auto">
         <table class="gtable">
-          <thead><tr><th>Grupo</th><th>≥1 en seguridad</th><th>Esperadas</th><th>Sigue en el mazo</th></tr></thead>
+          <thead><tr data-i18n="th-sec"><th>Grupo</th><th>≥1 en seguridad</th><th>Esperadas</th><th>Sigue en el mazo</th></tr></thead>
           <tbody id="secbody"></tbody>
         </table>
       </div>
       <div class="wall">
         <div class="tally-head">
-          <div class="eyebrow">Muro de seguridad</div>
-          <div class="ctrl"><span>Atacante</span>
+          <div class="eyebrow" data-i18n="wall-title">Muro de seguridad</div>
+          <div class="ctrl"><span data-i18n="lbl-atacante">Atacante</span>
             <div class="step">
-              <button id="dp-minus" aria-label="Menos DP">−</button>
+              <button id="dp-minus" data-i18n-aria="aria-dp-menos" aria-label="Menos DP">−</button>
               <div class="q mono" id="dp-n" style="width:56px">8000</div>
-              <button id="dp-plus" aria-label="Más DP">+</button>
+              <button id="dp-plus" data-i18n-aria="aria-dp-mas" aria-label="Más DP">+</button>
             </div>
           </div>
         </div>
-        <div class="wall-row"><span>El chequeo de arriba lo frena</span><b id="wall-1">—</b></div>
-        <div class="wall-row"><span>Alguna de las <span id="wall-s">5</span> lo frena</span><b id="wall-any">—</b></div>
+        <div class="wall-row"><span data-i18n="wall-1">El chequeo de arriba lo frena</span><b id="wall-1">—</b></div>
+        <div class="wall-row"><span id="wall-any-lbl"></span><b id="wall-any">—</b></div>
         <div class="wall-row" style="color:var(--muted); font-size:11.5px"><span id="wall-note"></span></div>
       </div>
     </section>
@@ -288,17 +300,17 @@ placeholder="// Digimon DeckList
   <!-- ============ GRÁFICO POR TURNO ============ -->
   <section class="panel" style="margin-top:26px">
     <div class="panel-head">
-      <h2>Probabilidad de haberla visto, turno a turno</h2>
+      <h2 data-i18n="chart-title">Probabilidad de haberla visto, turno a turno</h2>
       <div style="display:flex; gap:8px; align-items:center">
-        <div class="switch" role="group" aria-label="Orden de juego">
-          <button id="go-first" aria-pressed="false">Voy 1.º</button>
-          <button id="go-second" aria-pressed="true">Voy 2.º</button>
+        <div class="switch" role="group" data-i18n-aria="aria-orden" aria-label="Orden de juego">
+          <button id="go-first" aria-pressed="false" data-i18n="go-1">Voy 1.º</button>
+          <button id="go-second" aria-pressed="true" data-i18n="go-2">Voy 2.º</button>
         </div>
         <button class="btn ghost tiny" id="tbl-toggle" aria-pressed="false">Ver tabla</button>
       </div>
     </div>
     <div class="chart-wrap" id="chart-wrap">
-      <svg class="chart" id="chart" viewBox="0 0 960 330" role="img" aria-label="Probabilidad acumulada de ver al menos una carta de cada grupo, por turno"></svg>
+      <svg class="chart" id="chart" viewBox="0 0 960 330" role="img" data-i18n-aria="aria-chart" aria-label="Probabilidad acumulada de ver al menos una carta de cada grupo, por turno"></svg>
       <div id="tip" role="status"></div>
     </div>
     <div class="legend" id="legend"></div>
@@ -308,25 +320,25 @@ placeholder="// Digimon DeckList
   <!-- ============ COMPARAR MAZOS ============ -->
   <section class="panel" style="margin-top:26px">
     <div class="panel-head">
-      <h2>Comparar mazos</h2>
+      <h2 data-i18n="cmp-title">Comparar mazos</h2>
       <div style="display:flex; gap:8px; align-items:center">
         <button class="btn" id="ref-set">Fijar este mazo como referencia</button>
-        <button class="btn ghost tiny" id="ref-load" hidden>Cargar la referencia</button>
-        <button class="btn ghost tiny" id="ref-clear" hidden>Olvidar</button>
+        <button class="btn ghost tiny" id="ref-load" hidden data-i18n="ref-load">Cargar la referencia</button>
+        <button class="btn ghost tiny" id="ref-clear" hidden data-i18n="ref-clear">Olvidar</button>
       </div>
     </div>
     <div class="pad" id="cmp"></div>
   </section>
 
   <div class="formula">
-    <h3>Cómo se calcula</h3>
-    <p>Es más fácil contar las manos que <em>no</em> traen la carta y restar. Con <span class="mono">k</span> copias en un mazo de <span class="mono">N</span> cartas y una mano de <span class="mono">n</span>:</p>
+    <h3 data-i18n="f-title">Cómo se calcula</h3>
+    <p data-i18n="f-p1">Es más fácil contar las manos que <em>no</em> traen la carta y restar. Con <span class="mono">k</span> copias en un mazo de <span class="mono">N</span> cartas y una mano de <span class="mono">n</span>:</p>
     <div class="eq">P(≥1) = 1 − C(N−k, n) ÷ C(N, n)</div>
-    <p>Con 4 copias de Jupitermon en 50 cartas: de las <span class="mono">C(50,5) = 2.118.760</span> manos posibles, <span class="mono">C(46,5) = 1.370.754</span> no traen ninguna. Eso deja <span class="mono">35,30 %</span> de que aparezca al menos una.</p>
-    <p>La columna <b>con mulligan</b> asume que rebarajas siempre que ese grupo no aparece, y vale <span class="mono">1 − (1 − p)²</span>. El gráfico por turno usa la misma fórmula ampliando <span class="mono">n</span>: cada turno robas 1 carta, y el jugador que empieza se salta su primer robo.</p>
+    <p data-i18n="f-p2">Con 4 copias de una carta en 50: de las <span class="mono">C(50,5) = 2.118.760</span> manos posibles, <span class="mono">C(46,5) = 1.370.754</span> no traen ninguna. Eso deja <span class="mono">35,30 %</span> de que aparezca al menos una.</p>
+    <p data-i18n="f-p3">La columna <b>con mulligan</b> asume que rebarajas siempre que ese grupo no aparece, y vale <span class="mono">1 − (1 − p)²</span>. El gráfico por turno usa la misma fórmula ampliando <span class="mono">n</span>: cada turno robas 1 carta, y el jugador que empieza se salta su primer robo.</p>
     <div class="foot saveline">
-      <button class="btn primary" id="save-btn">Guardar mazo</button>
-      <button class="btn" id="csv-btn">Descargar CSV</button>
+      <button class="btn primary" id="save-btn" data-i18n="btn-save">Guardar mazo</button>
+      <button class="btn" id="csv-btn" data-i18n="btn-csv">Descargar CSV</button>
       <span class="msg" id="save-msg"></span>
     </div>
   </div>

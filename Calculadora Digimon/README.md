@@ -167,6 +167,33 @@ Las de cartas añadidas con el buscador se piden a `images.digimoncard.io`: en u
 página normal se ven, y dentro de un artefacto de Claude las bloquea la CSP y
 queda el marco vacío.
 
+## Idioma
+
+Botón **ES / EN** arriba a la derecha, junto al tema. La elección se guarda en
+`localStorage`, y en la primera visita se mira el idioma del navegador.
+
+Está montado con **un solo diccionario, el inglés**. El español es el original y
+vive en el propio código y en el HTML:
+
+- En el JavaScript, `T("Mazo legal")` devuelve la cadena tal cual en español, y
+  busca en `EN` cuando el idioma es inglés. Las llaves `{x}` se rellenan al
+  traducir, para que el orden de las palabras pueda cambiar entre idiomas.
+- En el HTML, los bloques traducibles llevan `data-i18n`. Su versión española se
+  captura del documento al arrancar y se restaura al volver a español; la
+  inglesa está en `EN_HTML`.
+
+La ventaja de no tener dos diccionarios simétricos es que **una traducción que
+falte se ve en español en vez de dejar un hueco en blanco**, y que el código
+sigue leyéndose en el idioma en que está escrito el proyecto.
+
+Los números también cambian: `dec()` decide el separador decimal (`35,30 %` o
+`35.30 %`) y `num()` el de miles (`8.000` u `8,000`).
+
+> **Al añadir texto nuevo**, pásalo por `T(...)` si está en el JavaScript, o
+> ponle un `data-i18n` si está en el HTML. Nunca pongas `data-i18n` en un
+> elemento que contenga un `id` que use el JavaScript: al cambiar de idioma se
+> reescribe su contenido y la referencia se pierde.
+
 ## Editar el mazo
 
 Tres caminos, y los tres valen:
