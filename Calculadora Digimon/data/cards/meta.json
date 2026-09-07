@@ -1,0 +1,10 @@
+{
+    "fetched_at":  "2026-09-07 00:09:48 -03:00",
+    "source_data":  "https://digimoncard.io/api-public/search.php?sort=name\u0026series=Digimon%20Card%20Game",
+    "source_image":  "https://images.digimoncard.io/images/cards/\u003cID\u003e.jpg",
+    "cards":  4412,
+    "images":  4412,
+    "images_mb":  463,
+    "formats":  "webp: 2108, png: 1748, jpg: 556",
+    "note":  "Datos y arte propiedad de Bandai. Archivo local para uso personal."
+}

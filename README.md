@@ -8,6 +8,7 @@ con su propio README y sus propias instrucciones.
 | Carpeta | Descripción | Stack |
 |---|---|---|
 | [Pag Colegio](./Pag%20Colegio/) | Sitio web del Colegio Diferencial Mostazal (RBD 15747), San Francisco de Mostazal | HTML, CSS y JavaScript puro |
+| [Calculadora Digimon](./Calculadora%20Digimon/) | Calculadora de probabilidad de mano inicial para el Digimon Card Game | HTML, CSS y JavaScript puro, con un build en Node sin dependencias |
 
 ## Ramas
 

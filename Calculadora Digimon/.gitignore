@@ -1,0 +1,21 @@
+# Salida de la compilación: se regenera con `npm run build`
+dist/
+
+# Dependencias (este proyecto no usa ninguna, pero por si acaso)
+node_modules/
+
+# Basura del sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editores
+.vscode/
+.idea/
+*.swp
+
+# Catálogo de cartas descargado con tools/fetch-cards.ps1.
+# Se regenera en cualquier momento, y las imágenes pesan ~460 MB.
+data/cards/images/
+data/cards/cards.json
+data/cards/sets/

@@ -15,8 +15,9 @@ Pag Colegio/
 ├── js/
 │   └── main.js       Menú móvil, contadores animados, validación del formulario
 ├── img/
-│   ├── logo.svg          Estrella (favicon, barra superior, hero)
-│   └── logo-completo.svg Versión horizontal con el nombre
+│   ├── logo.svg          Estrella del logo (favicon, barra superior, hero)
+│   ├── logo-completo.svg Versión horizontal compacta con el nombre
+│   └── logo-banner.svg   Logo institucional completo (fondo, estela y laurel)
 ├── .gitignore
 └── README.md
 ```

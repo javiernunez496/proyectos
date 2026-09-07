@@ -1,0 +1,278 @@
+<title>Mano Inicial Jupitermon</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+
+<script type="application/json" id="deck-state">
+<!--{{DECK}}-->
+</script>
+
+<script type="application/json" id="card-db">
+<!--{{CARDS}}-->
+</script>
+
+<script type="application/json" id="card-img">
+<!--{{IMAGES}}-->
+</script>
+
+<style>
+<!--{{STYLES}}-->
+</style>
+
+<script>
+/* Antes de pintar nada. Si hay un tema elegido se aplica ya, para no ver un
+   destello del contrario mientras carga el resto. Sin elección manda el sistema,
+   que es lo que hacen las media queries de la hoja de estilos. */
+try {
+  var t = localStorage.getItem("dcg-theme");
+  if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
+} catch (e) {}
+</script>
+
+<div class="wrap">
+
+  <header class="top">
+    <div class="title-block">
+      <div class="eyebrow">Digimon Card Game · Probabilidad de mano inicial</div>
+      <h1>Mano Inicial <span class="bolt">Jupitermon</span></h1>
+      <p class="lede">Ajusta las copias y mira cómo cambia lo que ves en las primeras 5 cartas. Cálculo <b>hipergeométrico exacto</b>, no simulación.</p>
+    </div>
+    <div class="meter-box">
+      <div class="theme-row">
+        <span class="eyebrow">Tema</span>
+        <div class="switch" role="group" aria-label="Tema de la página">
+          <button id="theme-auto" aria-pressed="true">Auto</button>
+          <button id="theme-light" aria-pressed="false">Claro</button>
+          <button id="theme-dark" aria-pressed="false">Oscuro</button>
+        </div>
+      </div>
+      <div class="meter-head">
+        <div class="eyebrow">Cartas en el mazo</div>
+        <div class="meter-count mono"><span id="deck-n">50</span><small>/50</small></div>
+      </div>
+      <div class="gauge">
+        <div class="gauge-fill" id="gauge-fill" style="width:100%"></div>
+        <div class="gauge-notches" id="notches"></div>
+      </div>
+      <div class="meter-status ok" id="deck-status"><i class="dot-status"></i><span>Mazo legal</span></div>
+    </div>
+  </header>
+
+  <div class="strip">
+    <div class="zap">⚡</div>
+    <p><b>Las 5 cartas de seguridad no alteran nada.</b> Salen del mismo mazo barajado, así que tu mano inicial sigue siendo 5 cartas al azar de las 50 — da igual si repartes seguridad antes o después. Todo lo de abajo asume eso.</p>
+  </div>
+
+  <!-- ============ IMPORTADOR DE LISTAS ============ -->
+  <details class="panel importer" id="importer">
+    <summary>
+      <span class="sum-title">
+        <h2>Cargar una lista</h2>
+        <span class="eyebrow">Pega el formato estándar del juego y el mazo se rehace entero</span>
+      </span>
+      <span class="chev" aria-hidden="true">▾</span>
+    </summary>
+    <div class="panel-body imp-body">
+      <p class="note">Una línea por carta: <span class="mono">copias · nombre · ID</span>. Las
+      líneas que empiezan por <span class="mono">//</span> se ignoran, y si el nombre se parte en
+      dos líneas se junta solo. El nivel, el coste y los DP salen del catálogo, así que el nombre
+      da igual: manda el ID.</p>
+      <textarea id="imp-text" spellcheck="false" rows="10" aria-label="Lista del mazo en formato de texto"
+placeholder="// Digimon DeckList
+
+4 Jupitermon                     BT24-101
+2 Aegiochusmon                   BT24-014
+1 Aegiomon                          P-194"></textarea>
+      <div class="imp-actions">
+        <button class="btn primary" id="imp-load">Cargar lista</button>
+        <button class="btn" id="imp-copy">Copiar el mazo actual</button>
+        <button class="btn ghost tiny" id="imp-clear">Limpiar</button>
+        <span class="msg" id="imp-msg" role="status"></span>
+      </div>
+      <div class="imp-report" id="imp-report"></div>
+    </div>
+  </details>
+
+  <div class="grid">
+
+    <!-- ============ IZQUIERDA: editor de mazo ============ -->
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Lista del mazo</h2>
+        <div class="eyebrow">≥1 &nbsp;·&nbsp; ≥2 copias en mano</div>
+      </div>
+      <div class="panel-body" id="decklist"></div>
+    </section>
+
+    <!-- ============ DERECHA: resultados ============ -->
+    <section class="panel" id="results">
+      <div class="ctrls">
+        <div class="ctrl">
+          <span>Mano</span>
+          <div class="step">
+            <button id="hand-minus" aria-label="Reducir tamaño de mano">−</button>
+            <div class="q mono" id="hand-n">5</div>
+            <button id="hand-plus" aria-label="Aumentar tamaño de mano">+</button>
+          </div>
+        </div>
+        <div class="ctrl">
+          <span>Mulligan</span>
+          <div class="switch" role="group" aria-label="Considerar mulligan">
+            <button id="mull-off" aria-pressed="false">No</button>
+            <button id="mull-on" aria-pressed="true">Sí</button>
+          </div>
+        </div>
+        <button class="btn ghost tiny" id="reset-btn" style="margin-left:auto">Restaurar</button>
+      </div>
+
+      <div style="overflow-x:auto">
+        <table class="gtable">
+          <thead>
+            <tr>
+              <th>Grupo</th><th>Copias</th><th>≥1 en mano</th><th>Con mulligan</th><th>Reparto</th>
+            </tr>
+          </thead>
+          <tbody id="gbody"></tbody>
+        </table>
+      </div>
+      <div class="dist-legend">
+        <span><i style="background:var(--track)"></i> 0 copias</span>
+        <span><i style="background:var(--o1)"></i> 1</span>
+        <span><i style="background:var(--o2)"></i> 2</span>
+        <span><i style="background:var(--o3)"></i> 3+</span>
+      </div>
+
+      <div class="tiles" id="tiles"></div>
+    </section>
+  </div>
+
+  <!-- ============ SIMULADOR ============ -->
+  <section class="panel" style="margin-top:26px">
+    <div class="panel-head">
+      <h2>Simulador de mano</h2>
+      <div style="display:flex; gap:8px; align-items:center">
+        <button class="btn ghost tiny" id="reveal-btn" aria-pressed="false">Revelar seguridad</button>
+        <button class="btn primary" id="draw-btn">Barajar y robar</button>
+      </div>
+    </div>
+    <div class="sim-top">
+      <div class="sim-col" style="flex:1 1 340px">
+        <div class="eyebrow">Mano <span id="hand-lbl" class="mono"></span></div>
+        <div class="hand" id="sim-hand"></div>
+      </div>
+      <div class="sim-col" style="flex:1 1 340px">
+        <div class="eyebrow">Seguridad <span id="sec-lbl" class="mono"></span></div>
+        <div class="hand" id="sim-sec"></div>
+      </div>
+    </div>
+    <div class="verdicts" id="verdicts"></div>
+    <div class="tally">
+      <div class="tally-head">
+        <div class="eyebrow">Frecuencia observada <span class="mono" id="runs-lbl">· 0 manos</span></div>
+        <div style="display:flex; gap:8px">
+          <button class="btn tiny" id="sim1k">Barajar 1.000 veces</button>
+          <button class="btn ghost tiny" id="sim-reset">Reiniciar cuenta</button>
+        </div>
+      </div>
+      <div class="tally-grid" id="tally"></div>
+    </div>
+  </section>
+
+  <!-- ============ LÍNEA COMPLETA + SEGURIDAD ============ -->
+  <div class="grid" style="margin-top:26px">
+    <section class="panel">
+      <div class="panel-head"><h2>Línea completa en la mano</h2></div>
+      <div class="linebox">
+        <div>
+          <div class="eyebrow" style="margin-bottom:8px">La línea necesita al menos una de cada</div>
+          <div class="legend" style="padding:0" id="line-chips"></div>
+        </div>
+        <div class="hero">
+          <div class="n" id="line-p">—</div>
+          <div class="cap" id="line-cap"></div>
+        </div>
+        <div class="subline">Con mulligan <b id="line-mull">—</b></div>
+        <div>
+          <div class="eyebrow" style="margin-bottom:6px">Probabilidad acumulada por turno</div>
+          <div class="turnstrip" id="line-turns"></div>
+        </div>
+        <div>
+          <div class="eyebrow" style="margin-bottom:8px">Lo que cuesta cada eslabón, en la mano inicial</div>
+          <div id="line-cascade"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Qué se va a la seguridad</h2>
+        <div class="ctrl"><span>Cartas</span>
+          <div class="step">
+            <button id="sec-minus" aria-label="Menos cartas de seguridad">−</button>
+            <div class="q mono" id="sec-n">5</div>
+            <button id="sec-plus" aria-label="Más cartas de seguridad">+</button>
+          </div>
+        </div>
+      </div>
+      <p class="note" style="padding-top:14px">Las cartas de seguridad no se pierden: los Tamer y Option de este mazo tienen efecto de seguridad, y un Digimon ahí abajo frena un ataque si su DP aguanta.</p>
+      <div style="overflow-x:auto">
+        <table class="gtable">
+          <thead><tr><th>Grupo</th><th>≥1 en seguridad</th><th>Esperadas</th><th>Sigue en el mazo</th></tr></thead>
+          <tbody id="secbody"></tbody>
+        </table>
+      </div>
+      <div class="wall">
+        <div class="tally-head">
+          <div class="eyebrow">Muro de seguridad</div>
+          <div class="ctrl"><span>Atacante</span>
+            <div class="step">
+              <button id="dp-minus" aria-label="Menos DP">−</button>
+              <div class="q mono" id="dp-n" style="width:56px">8000</div>
+              <button id="dp-plus" aria-label="Más DP">+</button>
+            </div>
+          </div>
+        </div>
+        <div class="wall-row"><span>El chequeo de arriba lo frena</span><b id="wall-1">—</b></div>
+        <div class="wall-row"><span>Alguna de las <span id="wall-s">5</span> lo frena</span><b id="wall-any">—</b></div>
+        <div class="wall-row" style="color:var(--muted); font-size:11.5px"><span id="wall-note"></span></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ============ GRÁFICO POR TURNO ============ -->
+  <section class="panel" style="margin-top:26px">
+    <div class="panel-head">
+      <h2>Probabilidad de haberla visto, turno a turno</h2>
+      <div style="display:flex; gap:8px; align-items:center">
+        <div class="switch" role="group" aria-label="Orden de juego">
+          <button id="go-first" aria-pressed="false">Voy 1.º</button>
+          <button id="go-second" aria-pressed="true">Voy 2.º</button>
+        </div>
+        <button class="btn ghost tiny" id="tbl-toggle" aria-pressed="false">Ver tabla</button>
+      </div>
+    </div>
+    <div class="chart-wrap" id="chart-wrap">
+      <svg class="chart" id="chart" viewBox="0 0 960 330" role="img" aria-label="Probabilidad acumulada de ver al menos una carta de cada grupo, por turno"></svg>
+      <div id="tip" role="status"></div>
+    </div>
+    <div class="legend" id="legend"></div>
+    <div class="tblview" id="tblview" hidden></div>
+  </section>
+
+  <div class="formula">
+    <h3>Cómo se calcula</h3>
+    <p>Es más fácil contar las manos que <em>no</em> traen la carta y restar. Con <span class="mono">k</span> copias en un mazo de <span class="mono">N</span> cartas y una mano de <span class="mono">n</span>:</p>
+    <div class="eq">P(≥1) = 1 − C(N−k, n) ÷ C(N, n)</div>
+    <p>Con 4 copias de Jupitermon en 50 cartas: de las <span class="mono">C(50,5) = 2.118.760</span> manos posibles, <span class="mono">C(46,5) = 1.370.754</span> no traen ninguna. Eso deja <span class="mono">35,30 %</span> de que aparezca al menos una.</p>
+    <p>La columna <b>con mulligan</b> asume que rebarajas siempre que ese grupo no aparece, y vale <span class="mono">1 − (1 − p)²</span>. El gráfico por turno usa la misma fórmula ampliando <span class="mono">n</span>: cada turno robas 1 carta, y el jugador que empieza se salta su primer robo.</p>
+    <div class="foot saveline">
+      <button class="btn primary" id="save-btn">Guardar mazo</button>
+      <button class="btn" id="csv-btn">Descargar CSV</button>
+      <span class="msg" id="save-msg"></span>
+    </div>
+  </div>
+</div>
+
+<script>
+<!--{{APP}}-->
+</script>
