@@ -33,9 +33,9 @@ try {
 
   <header class="top">
     <div class="title-block">
-      <div class="eyebrow">Digimon Card Game · Probabilidad de mano inicial</div>
+      <div class="eyebrow">Digimon Card Game · Análisis de mazos</div>
       <h1>Digimon <span class="bolt">Analytics</span></h1>
-      <p class="lede">Ajusta las copias y mira cómo cambia lo que ves en las primeras 5 cartas. Cálculo <b>hipergeométrico exacto</b>, no simulación.</p>
+      <p class="lede">Mide cómo se comporta un mazo antes de sentarte a jugarlo: qué abres de mano, cuánto aguanta la línea de evolución, qué se te va a seguridad y cómo cambia turno a turno. Cálculo <b>hipergeométrico exacto</b>, no simulación.</p>
     </div>
     <div class="meter-box">
       <div class="theme-row">
@@ -66,7 +66,7 @@ try {
 
   <div class="strip">
     <div class="zap">⚡</div>
-    <p><b>Las 5 cartas de seguridad no alteran nada.</b> Salen del mismo mazo barajado, así que tu mano inicial sigue siendo 5 cartas al azar de las 50 — da igual si repartes seguridad antes o después. Todo lo de abajo asume eso.</p>
+    <p><b>Ningún número está atado a un mazo concreto.</b> Pega tu lista o móntala con el buscador, y todo lo de abajo —mano inicial, línea de evolución, seguridad, turno a turno— se recalcula sobre esas 50 cartas. Como es combinatoria exacta y no simulación, dos mazos se pueden comparar sin ruido de por medio.</p>
   </div>
 
   <!-- ============ IMPORTADOR DE LISTAS ============ -->
@@ -220,7 +220,7 @@ placeholder="// Digimon DeckList
           </div>
         </div>
       </div>
-      <p class="note" style="padding-top:14px">Las cartas de seguridad no se pierden: los Tamer y Option de este mazo tienen efecto de seguridad, y un Digimon ahí abajo frena un ataque si su DP aguanta.</p>
+      <p class="note" style="padding-top:14px"><b>Repartir seguridad no altera la mano inicial.</b> Las 5 salen del mismo mazo barajado, así que tu mano sigue siendo 5 cartas al azar de las 50: da igual si repartes seguridad antes o después. Tampoco se pierden, los Tamer y Option con efecto de seguridad se disparan ahí abajo, y un Digimon frena un ataque si su DP aguanta.</p>
       <div style="overflow-x:auto">
         <table class="gtable">
           <thead><tr><th>Grupo</th><th>≥1 en seguridad</th><th>Esperadas</th><th>Sigue en el mazo</th></tr></thead>

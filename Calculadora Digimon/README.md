@@ -1,8 +1,13 @@
 # Digimon Analytics
 
-Calculadora de probabilidad de mano inicial para el **Digimon Card Game**, hecha
-para un mazo concreto de 50 cartas (Aegiomon → Aegiochusmon → Jupitermon), más su
-mazo de Digi-Egg aparte. Página estática, sin dependencias, sin servidor.
+Herramienta de **análisis de mazos** para el Digimon Card Game: mano inicial,
+consistencia de la línea de evolución, seguridad y probabilidad turno a turno,
+sobre cualquier mazo de 50 cartas más su mazo de Digi-Egg. Página estática, sin
+dependencias, sin servidor.
+
+El mazo que trae cargado de fábrica (`data/deck.json`) es uno concreto
+—Aegiomon → Aegiochusmon → Jupitermon—, pero se cambia entero pegando una lista
+o con el buscador de cartas: nada del cálculo está atado a él.
 
 (El repositorio y la carpeta siguen llamándose «Calculadora Digimon»;
 *Digimon Analytics* es el nombre de la página.)
