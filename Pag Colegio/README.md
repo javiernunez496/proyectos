@@ -18,19 +18,28 @@ Pag Colegio/
 │   ├── logo.svg          Estrella del logo (favicon, barra superior, hero)
 │   ├── logo-completo.svg Versión horizontal compacta con el nombre
 │   └── logo-banner.svg   Logo institucional completo (fondo, estela y laurel)
+├── ver-pagina.bat    Doble clic: abre la web con recarga automática
+├── dev/
+│   └── servidor.ps1  Servidor local de desarrollo (solo para trabajar)
 ├── .gitignore
 └── README.md
 ```
 
 ## Cómo verla
 
-Doble clic en `index.html`, o desde la terminal:
+**Recomendado — doble clic en `ver-pagina.bat`.**
 
-```bash
-start index.html
-```
+Abre la página en `http://localhost:8080` y **se recarga sola cada vez que
+guardas un archivo**: no hay que apretar F5. Para detenerlo, cierra la ventana
+negra o pulsa Ctrl+C dentro de ella.
 
-Cualquier cambio se ve recargando el navegador con F5.
+No necesita instalar nada (usa PowerShell, que ya viene con Windows).
+Si el puerto 8080 está ocupado, busca el siguiente libre y lo dice en pantalla.
+
+**Alternativa rápida — doble clic en `index.html`.**
+
+La abre directamente desde el disco (`file://`). Funciona igual, pero hay que
+recargar a mano con F5 después de cada cambio.
 
 ## Secciones
 
