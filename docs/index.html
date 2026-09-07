@@ -582,6 +582,12 @@ svg.chart{display:block; width:100%; height:auto; overflow:visible}
 .saveline{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
 .saveline .msg{font-size:11.5px; color:var(--muted)}
 
+/* Aviso legal. Discreto pero legible: es lo que separa una herramienta de fans
+   de algo que aparenta ser oficial, así que no se esconde ni se pone en gris
+   sobre gris. */
+.legal{margin-top:26px; padding-top:16px; border-top:1px solid var(--line)}
+.legal p{margin:0; font-size:11.5px; line-height:1.55; color:var(--muted); max-width:88ch}
+
 :focus-visible{outline:2px solid var(--accent-fill); outline-offset:2px; border-radius:3px}
 @media (prefers-reduced-motion:reduce){ *{transition:none!important; animation:none!important} }
 </style>
@@ -909,6 +915,11 @@ placeholder="// Digimon DeckList
       <span class="msg" id="save-msg"></span>
     </div>
   </div>
+
+  <!-- Aviso legal. Va al final y visible, no escondido tras un enlace. -->
+  <footer class="legal">
+    <p data-i18n="legal">Este sitio web es una herramienta para fans sin fines de lucro y no está afiliado, respaldado ni asociado con Bandai ni Toei Animation. Las imágenes de las cartas y las marcas registradas de Digimon son propiedad de sus respectivos dueños.</p>
+  </footer>
 </div>
 
 <script>
@@ -1159,7 +1170,8 @@ var EN_HTML = {
   "f-p2": "With 4 copies of a card in 50: out of the <span class=\"mono\">C(50,5) = 2,118,760</span> possible hands, <span class=\"mono\">C(46,5) = 1,370,754</span> hold none. That leaves <span class=\"mono\">35.30 %</span> for at least one to turn up.",
   "f-p3": "The <b>with mulligan</b> column assumes you reshuffle whenever that group fails to turn up, and works out to <span class=\"mono\">1 − (1 − p)²</span>. The turn-by-turn chart uses the same formula with a larger <span class=\"mono\">n</span>: you draw 1 card per turn, and the player going first skips their first draw.",
   "btn-save": "Save deck",
-  "btn-csv": "Download CSV"
+  "btn-csv": "Download CSV",
+  "legal": "This website is a non-profit fan-made tool and is not affiliated with, endorsed by or associated with Bandai or Toei Animation. Card images and Digimon trademarks are the property of their respective owners."
 };
 
 // Atributos, por su data-i18n-aria.
