@@ -245,7 +245,8 @@ var EN_HTML = {
   "f-p2": "With 4 copies of a card in 50: out of the <span class=\"mono\">C(50,5) = 2,118,760</span> possible hands, <span class=\"mono\">C(46,5) = 1,370,754</span> hold none. That leaves <span class=\"mono\">35.30 %</span> for at least one to turn up.",
   "f-p3": "The <b>with mulligan</b> column assumes you reshuffle whenever that group fails to turn up, and works out to <span class=\"mono\">1 − (1 − p)²</span>. The turn-by-turn chart uses the same formula with a larger <span class=\"mono\">n</span>: you draw 1 card per turn, and the player going first skips their first draw.",
   "btn-save": "Save deck",
-  "btn-csv": "Download CSV"
+  "btn-csv": "Download CSV",
+  "legal": "This website is a non-profit fan-made tool and is not affiliated with, endorsed by or associated with Bandai or Toei Animation. Card images and Digimon trademarks are the property of their respective owners."
 };
 
 // Atributos, por su data-i18n-aria.
