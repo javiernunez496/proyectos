@@ -5,9 +5,9 @@ consistencia de la línea de evolución, seguridad y probabilidad turno a turno,
 sobre cualquier mazo de 50 cartas más su mazo de Digi-Egg. Página estática, sin
 dependencias, sin servidor.
 
-El mazo que trae cargado de fábrica (`data/deck.json`) es uno concreto
-—Aegiomon → Aegiochusmon → Jupitermon—, pero se cambia entero pegando una lista
-o con el buscador de cartas: nada del cálculo está atado a él.
+**La página arranca sin ningún mazo cargado.** Pegas tu lista o la montas con el
+buscador, y a partir de ahí se calcula todo. En `data/mazos/` hay mazos de
+ejemplo guardados, listos para pegar.
 
 (El repositorio y la carpeta siguen llamándose «Calculadora Digimon»;
 *Digimon Analytics* es el nombre de la página.)
@@ -65,7 +65,8 @@ mira las `n + s` cartas de arriba a la vez.
 │   ├── publicar.ps1    # copia dist/index.html a docs/ para GitHub Pages
 │   └── servidor.ps1    # servidor local con recarga automática
 ├── data/
-│   ├── deck.json       # el mazo: nombre, grupo, coste, DP y copias
+│   ├── deck.json       # el mazo de arranque: vacío a propósito
+│   ├── mazos/          # mazos de ejemplo (.txt para pegar, .json para arrancar)
 │   ├── deck.linked.json# el mazo con el ID oficial y la imagen de cada carta
 │   └── cards/          # catálogo descargado (ver «Catálogo de cartas»)
 ├── tools/
@@ -146,9 +147,11 @@ La configuración en GitHub se hace una sola vez, en **Settings → Pages →
 Deploy from a branch → `master` → `/docs`**. La página queda en
 `https://javiernunez496.github.io/proyectos/`.
 
-> **No refresques `docs/` en cada retoque.** Son 1,3 MB que cambian enteros en
-> cada compilación, porque llevan las ilustraciones incrustadas en base64. Un
-> commit por publicación de verdad, no uno por cambio.
+Con el mazo de arranque vacío la página pesa unos **264 KB**, porque no lleva
+ninguna ilustración incrustada. Si algún día vuelves a dejar un mazo cargado de
+fábrica, se dispara a 1,3 MB: son las imágenes en base64. En ese caso, refresca
+`docs/` solo cuando publiques de verdad, no en cada retoque, o el historial de
+git se infla con copias enteras del archivo.
 
 ### Qué cambia fuera de Claude
 
@@ -175,10 +178,17 @@ Tres caminos, y los tres valen:
    eliminas cartas con la `×` y añades con el botón de cada categoría, que abre
    el **buscador de cartas** (ver abajo). Los cambios viven en la pestaña; al
    recargar vuelve a `data/deck.json`.
-3. **En `data/deck.json`.** Es la fuente de verdad. Cada carta es
+3. **En `data/deck.json`.** Es lo que trae la página al abrirse, y **viene
+   vacío a propósito**: es una herramienta de análisis, no la página de un mazo
+   concreto. Cada carta es
    `{"n": nombre, "g": grupo, "c": coste, "dp": DP, "q": copias, "id": ID}`.
    Las 50 van en `cards` y los Digi-Egg en `eggs`, con el mismo formato.
    Recompila y listo.
+
+Mientras no haya cartas, la página lo dice y abre sola el panel de cargar lista,
+en vez de enseñar una pared de ceros. En `data/mazos/` quedan guardados los mazos
+de ejemplo: el `.txt` se pega directamente en el importador, y el `.json` sirve
+para volver a dejarlo como mazo de arranque copiándolo sobre `data/deck.json`.
 
 Los grupos válidos son `Lv.3`, `Lv.4`, `Lv.5`, `Lv.6`, `Lv.7`, `Tamer` y `Option`.
 Un `dp` de `0` marca que la carta no es un Digimon, y eso es lo que usa el cálculo

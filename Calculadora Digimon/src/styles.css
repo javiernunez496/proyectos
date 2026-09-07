@@ -103,6 +103,10 @@ h1 .bolt{color:var(--accent)}
   border-radius:0 5px 5px 0;
 }
 .strip .zap{font-family:"Chakra Petch",sans-serif; font-weight:700; color:var(--accent); font-size:18px; line-height:1.35; flex:0 0 auto}
+/* Aviso de arranque sin mazo. Se distingue del destacado normal para que no se
+   lea como un dato más de la página, sino como algo que hay que hacer. */
+.strip.empty{background:var(--surface-2); border-left-color:var(--s-lv3)}
+.strip.empty .zap{color:var(--s-lv3); font-size:15px}
 .strip p{margin:0; font-size:13.5px; color:var(--ink-2); max-width:78ch}
 .strip p b{color:var(--ink); font-weight:600}
 

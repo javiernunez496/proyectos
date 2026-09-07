@@ -1,0 +1,24 @@
+// Digimon DeckList
+
+2 Aegiochusmon                 BT24-014
+4 Elecmon                      BT24-031
+4 Aegiomon                     BT24-034
+2 Minervamon                   BT24-041
+2 Tapirmon                     BT24-043
+3 Inori Misono                 BT24-084
+1 Dan Yuki & Kanan Yuki        BT24-085
+2 Asuna Shiroki                BT24-088
+1 In-Between Theater           BT24-100
+4 Jupitermon                   BT24-101
+2 Homeros                      BT24-102
+2 Aegiochusmon: Blue           BT25-025
+3 Elecmon                      BT25-030
+4 Aegiomon                     BT25-033
+3 Aegiochusmon: Holy           BT26-029
+2 Jupitermon                   BT26-033
+1 Kanan Yuki                   BT26-090
+2 The Thunder Emperor Awakens  BT26-097
+2 Jupitermon: Wrath Mode       BT26-103
+1 Aegiomon                     P-194
+2 Patamon                      P-197
+1 Aegiochusmon                 P-213

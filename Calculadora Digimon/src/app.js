@@ -44,14 +44,17 @@ function logC(n,k){
   if (k < 0 || n < 0 || k > n) return -Infinity;
   return LF[n] - LF[k] - LF[n-k];
 }
+/* Con el mazo vacío estos logaritmos salen −Infinity por los dos lados y la
+   resta da NaN, así que no basta con comparar contra −Infinity: cualquier
+   resultado que no sea finito es una probabilidad que no existe, y vale 0. */
 function pExact(k,x,N,n){
   var v = logC(k,x) + logC(N-k, n-x) - logC(N,n);
-  return v === -Infinity ? 0 : Math.exp(v);
+  return isFinite(v) ? Math.exp(v) : 0;
 }
 function pNone(k,N,n){
   if (N - k < n) return 0;
   var v = logC(N-k,n) - logC(N,n);
-  return v === -Infinity ? 0 : Math.exp(v);
+  return isFinite(v) ? Math.exp(v) : 0;
 }
 function pAtLeast(k,x,N,n){
   var s = 0;
@@ -62,7 +65,9 @@ function pAtLeast(k,x,N,n){
 /* ---------------- derivados ---------------- */
 function totalCards(){ var t=0; for (var i=0;i<S.cards.length;i++) t += S.cards[i].q; return t; }
 function groupCount(g){ var t=0; for (var i=0;i<S.cards.length;i++) if (S.cards[i].g===g) t += S.cards[i].q; return t; }
-function handSize(){ return Math.min(S.hand, Math.max(1, totalCards())); }
+// Sin mazo no hay mano que acotar, y enseñar "1" haría dudar de un ajuste que
+// el usuario no ha tocado: se muestra la mano que tiene elegida.
+function handSize(){ var N = totalCards(); return N ? Math.min(S.hand, N) : S.hand; }
 function eggCards(){ var t=0; for (var i=0;i<S.eggs.length;i++) t += S.eggs[i].q; return t; }
 
 function fmt(p){ return (p*100).toFixed(2).replace(".", ",") + " %"; }
@@ -1706,6 +1711,9 @@ function csvTexto(){
 /* ---------------- ciclo de render ---------------- */
 function renderAll(){
   S.hand = Math.max(1, Math.min(12, S.hand));
+  var vacio = !totalCards();
+  document.getElementById("empty-note").hidden = !vacio;
+  document.getElementById("intro-note").hidden = vacio;
   setPressed("mull-on", S.mull); setPressed("mull-off", !S.mull);
   setPressed("go-first", S.first); setPressed("go-second", !S.first);
   document.getElementById("hand-n").textContent = handSize();
@@ -1723,6 +1731,13 @@ function renderAll(){
   renderChart();
 }
 renderAll();
+
+// Arrancar sin mazo es lo normal: se abre el importador, que es por donde se
+// empieza. Solo al cargar la página, para no reabrirlo si el usuario lo cierra.
+if (!totalCards()){
+  var imp = document.getElementById("importer");
+  if (imp) imp.open = true;
+}
 
 var mq = window.matchMedia("(prefers-color-scheme: dark)");
 if (mq.addEventListener) mq.addEventListener("change", renderChart);

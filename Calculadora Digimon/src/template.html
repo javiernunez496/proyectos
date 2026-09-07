@@ -64,7 +64,13 @@ try {
     </div>
   </header>
 
-  <div class="strip">
+  <!-- Solo uno de los dos se ve: el de arranque mientras no haya mazo. -->
+  <div class="strip empty" id="empty-note" hidden>
+    <div class="zap">◆</div>
+    <p><b>Empieza cargando un mazo.</b> Pega tu lista en «Cargar una lista» aquí abajo, o móntalo carta a carta con el buscador que hay en cada nivel de la lista del mazo. Hasta que haya cartas, todo lo demás está a cero: no hay nada que calcular todavía.</p>
+  </div>
+
+  <div class="strip" id="intro-note">
     <div class="zap">⚡</div>
     <p><b>Ningún número está atado a un mazo concreto.</b> Pega tu lista o móntala con el buscador, y todo lo de abajo —mano inicial, línea de evolución, seguridad, turno a turno— se recalcula sobre esas 50 cartas. Como es combinatoria exacta y no simulación, dos mazos se pueden comparar sin ruido de por medio.</p>
   </div>
